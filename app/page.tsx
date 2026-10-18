@@ -24,6 +24,7 @@ import {
   ArrowRight,
   ChevronDown,
   CircleDollarSign,
+  Download,
   ExternalLink,
   FileText,
   Menu,
@@ -360,7 +361,6 @@ function Hero({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
             />
             <div className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-400">
               <span>{timeLabel(hour)} · {brl(load, 1)} GW</span>
-              <span>24h</span>
             </div>
           </figure>
           <div className="flex flex-col justify-end lg:pb-1">
@@ -406,8 +406,8 @@ function HomeCharts() {
             <YAxis domain={[30, 80]} ticks={[30, 40, 50, 60, 70, 80]} tick={{ fontSize: 11 }} tickFormatter={(value) => integerFormat.format(Number(value))} />
             <Tooltip labelFormatter={(value) => `${value}h`} formatter={(value, name) => [`${numberFormat.format(Number(value))} GW`, name === 'set2026' ? 'set/2026' : 'set/2025']} />
             <Legend formatter={(value) => (value === 'set2026' ? 'set/2026' : 'set/2025')} />
-            <Line dataKey="set2025" name="set2025" type="monotone" stroke="#94a3b8" strokeWidth={2} dot={false} />
-            <Line dataKey="set2026" name="set2026" type="monotone" stroke="#b91c1c" strokeWidth={2.5} dot={false} />
+            <Line dataKey="set2025" name="set2025" type="monotone" stroke="#94a3b8" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <Line dataKey="set2026" name="set2026" type="monotone" stroke="#b91c1c" strokeWidth={2.5} dot={false} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -418,7 +418,7 @@ function HomeCharts() {
             <XAxis dataKey="year" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip formatter={(value) => [`${numberFormat.format(Number(value))} GW`, 'Potência']} />
-            <Bar dataKey="capacity" name="Potência" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="capacity" name="Potência" radius={[4, 4, 0, 0]} isAnimationActive={false}>
               {distributedSolar.map((entry) => <Cell key={entry.year} fill={entry.partial ? '#fca5a5' : '#334155'} />)}
             </Bar>
           </BarChart>
@@ -431,7 +431,7 @@ function HomeCharts() {
             <XAxis dataKey="year" tick={{ fontSize: 11 }} interval={2} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip formatter={(value) => [integerFormat.format(Number(value)), 'Reatores']} />
-            <Bar dataKey="count" name="Reatores" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="count" name="Reatores" radius={[4, 4, 0, 0]} isAnimationActive={false}>
               {reactors.map((entry) => <Cell key={entry.year} fill={entry.partial ? '#fca5a5' : '#b91c1c'} />)}
             </Bar>
           </BarChart>
@@ -444,7 +444,7 @@ function HomeCharts() {
             <XAxis type="number" tick={{ fontSize: 11 }} />
             <YAxis type="category" dataKey="name" width={78} tick={{ fontSize: 11 }} />
             <Tooltip formatter={(value) => [integerFormat.format(Number(value)), 'Reatores']} />
-            <Bar dataKey="count" fill="#b91c1c" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="count" fill="#b91c1c" radius={[0, 4, 4, 0]} isAnimationActive={false} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -455,7 +455,7 @@ function HomeCharts() {
             <XAxis type="number" tick={{ fontSize: 11 }} />
             <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 11 }} />
             <Tooltip formatter={(value) => [integerFormat.format(Number(value)), 'Reatores']} />
-            <Bar dataKey="count" fill="#475569" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="count" fill="#475569" radius={[0, 4, 4, 0]} isAnimationActive={false} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -593,6 +593,10 @@ function AboutPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
               <li><ExternalSource href={REFERENCE_URLS.parpel}>ONS, PAR/PEL 2025</ExternalSource></li>
               <li><ExternalSource href={REFERENCE_URLS.aneel}>ANEEL, geração distribuída</ExternalSource></li>
             </ul>
+            <a href="/PoliVSR_Relatorio_Metodologia.pdf" download="PoliVSR_Relatorio_Metodologia.pdf" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-red-800 hover:text-red-950">
+              <Download aria-hidden="true" className="h-4 w-4" />
+              Relatório de metodologia (PDF)
+            </a>
             <button onClick={() => onNavigate('data')} className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-red-800 hover:text-red-950">
               Dados e limites do modelo <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </button>
@@ -729,8 +733,6 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
   const breakEven = activeVariant.equilibrio_mi[1]
   const operation = Math.round(scenarioData.oper.ops_fixo_ano - scenarioData.oper.ops_vsr_ano)
   const options = Object.entries(variants) as [string, any][]
-  const priceStep = scenarioData.kv === 500 ? 0.5 : 0.1
-  const roundedPrice = (value: number) => Math.round(value / priceStep) * priceStep
   const pricePremium = price / (scenarioData.preco_fixos / 1_000_000) - 1
   const chartData = scenarioData.grade.map((grid: number, index: number) => ({
     price: grid,
@@ -752,8 +754,6 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
         vsrP10: vsrAtPrice('p10'),
         vsrP50: vsrAtPrice('p50'),
         vsrP90: vsrAtPrice('p90'),
-        fixoBand: risk.fixo.p90[index] - risk.fixo.p10[index],
-        vsrBand: vsrAtPrice('p90') - vsrAtPrice('p10'),
       }
     })
   }, [price, scenarioData, view])
@@ -787,10 +787,9 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
 
   const chooseScenario = (id: string) => {
     const data = model.cenarios[id]
-    const step = data.kv === 500 ? 0.5 : 0.1
     setScenario(id)
     setVariant('base')
-    setPrice(Math.round((data.precos.base / 1_000_000) / step) * step)
+    setPrice(data.precos.base / 1_000_000)
   }
 
   const chooseView = (nextView: View) => {
@@ -811,15 +810,15 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
 
   const select2023Price = () => {
     setVariant('base')
-    setPrice(roundedPrice(scenarioData.precos.estresse_baixo / 1_000_000))
+    setPrice(scenarioData.precos.estresse_baixo / 1_000_000)
     resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const priceChips = [
-    { label: 'Contratos 2025–26', value: roundedPrice(scenarioData.precos.base / 1_000_000) },
-    { label: 'Faixa baixa', value: roundedPrice(scenarioData.precos.baixo / 1_000_000) },
-    { label: 'Faixa alta', value: roundedPrice(scenarioData.precos.alto / 1_000_000) },
-    { label: 'Nível de 2023', value: roundedPrice(scenarioData.precos.estresse_baixo / 1_000_000) },
+    { label: 'Contratos 2025–26', value: scenarioData.precos.base / 1_000_000 },
+    { label: 'Faixa baixa', value: scenarioData.precos.baixo / 1_000_000 },
+    { label: 'Faixa alta', value: scenarioData.precos.alto / 1_000_000 },
+    { label: 'Nível de 2023', value: scenarioData.precos.estresse_baixo / 1_000_000 },
   ]
 
   return (
@@ -881,7 +880,7 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
                 type="range"
                 min={scenarioData.grade[0]}
                 max={scenarioData.grade[scenarioData.grade.length - 1]}
-                step={priceStep}
+                step="any"
                 value={price}
                 aria-label="Preço do VSR em milhões de reais"
                 onChange={(event) => setPrice(Number(event.target.value))}
@@ -953,12 +952,10 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
                     <YAxis domain={[fanYMin, fanYMax]} ticks={fanTicks} tick={{ fontSize: 11 }} tickFormatter={(value) => numberFormat.format(Number(value))} />
                     <Tooltip labelFormatter={(value) => `Ano ${value}`} formatter={(value, name) => [`R$ ${brl(Number(value))} mi`, name]} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Area dataKey="fixoP10" stackId="fixo" stroke="none" fill="transparent" legendType="none" name="Reator fixo P10" />
-                    <Area dataKey="fixoBand" stackId="fixo" stroke="none" fill="#fda4af" fillOpacity={0.48} name="Reator fixo P10–P90" />
-                    <Area dataKey="vsrP10" stackId="vsr" stroke="none" fill="transparent" legendType="none" name="VSR P10" />
-                    <Area dataKey="vsrBand" stackId="vsr" stroke="none" fill="#6ee7b7" fillOpacity={0.5} name="VSR P10–P90" />
-                    <Line dataKey="fixoP50" type="monotone" stroke="#be123c" strokeWidth={2} dot={false} name="Reator fixo P50" />
-                    <Line dataKey="vsrP50" type="monotone" stroke="#047857" strokeWidth={2} dot={false} name="VSR P50" />
+                    <Area dataKey={(point: any) => [point.fixoP10, point.fixoP90]} stroke="none" fill="#fda4af" fillOpacity={0.48} name="Reator fixo P10–P90" isAnimationActive={false} />
+                    <Area dataKey={(point: any) => [point.vsrP10, point.vsrP90]} stroke="none" fill="#6ee7b7" fillOpacity={0.5} name="VSR P10–P90" isAnimationActive={false} />
+                    <Line dataKey="fixoP50" type="monotone" stroke="#be123c" strokeWidth={2} dot={false} name="Reator fixo P50" isAnimationActive={false} />
+                    <Line dataKey="vsrP50" type="monotone" stroke="#047857" strokeWidth={2} dot={false} name="VSR P50" isAnimationActive={false} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -1010,10 +1007,13 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
                 <ReferenceArea x1={scenarioData.precos.baixo / 1_000_000} x2={scenarioData.precos.alto / 1_000_000} fill="#059669" fillOpacity={0.08} stroke="none" />
                 <ReferenceLine x={price} stroke="#0f172a" strokeDasharray="4 4" />
                 <ReferenceLine y={0} stroke="#94a3b8" />
-                <Area dataKey="p10" stackId="range" stroke="none" fill="transparent" legendType="none" name="P10" />
-                <Area dataKey="band" stackId="range" stroke="none" fill="#6ee7b7" fillOpacity={0.3} name="P10–P90" />
-                <Line dataKey="p50" type="monotone" stroke="#047857" strokeWidth={2.5} dot={false} name="VPL mediano" />
-                <ReferenceDot x={breakEven} y={0} r={4} fill="#0f172a" stroke="white" label={{ value: `Equilíbrio R$ ${brl(breakEven)} mi`, position: 'top', fill: '#0f172a', fontSize: 11 }} />
+                <Area dataKey="p10" stackId="range" stroke="none" fill="transparent" legendType="none" name="P10" isAnimationActive={false} />
+                <Area dataKey="band" stackId="range" stroke="none" fill="#6ee7b7" fillOpacity={0.3} name="P10–P90" isAnimationActive={false} />
+                <Line dataKey="p50" type="monotone" stroke="#047857" strokeWidth={2.5} dot={false} name="VPL mediano" isAnimationActive={false} />
+                <ReferenceDot x={breakEven} y={0} r={4} fill="#0f172a" stroke="white" label={(labelProps: any) => {
+                  const { cx, cy } = labelProps.viewBox
+                  return <text x={cx + 8} y={cy + 16} fill="#0f172a" fontSize={11} textAnchor="start">{`Equilíbrio R$ ${brl(breakEven)} mi`}</text>
+                }} />
                 <ReferenceDot x={price} y={p50} r={5} fill="#047857" stroke="white" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
@@ -1056,9 +1056,9 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
                 <YAxis type="number" domain={[0, 1]} ticks={[0, 0.5, 1]} tick={{ fontSize: 11 }} tickFormatter={(value) => `${Math.round(Number(value) * 100)}%`} />
                 <Tooltip labelFormatter={(value) => timeLabel(Number(value))} formatter={(value, name) => [`${Math.round(Number(value) * 100)}%`, name]} />
                 <Legend />
-                <Line dataKey="need" type="monotone" stroke="#64748b" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Necessidade" />
-                <Line dataKey="fixo" type="stepAfter" stroke="#b91c1c" strokeWidth={2} dot={false} name="Reator fixo" />
-                <Line dataKey="vsr" type="stepAfter" stroke="#047857" strokeWidth={2} dot={false} name="VSR" />
+                <Line dataKey="need" type="monotone" stroke="#64748b" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Necessidade" isAnimationActive={false} />
+                <Line dataKey="fixo" type="stepAfter" stroke="#b91c1c" strokeWidth={2} dot={false} name="Reator fixo" isAnimationActive={false} />
+                <Line dataKey="vsr" type="stepAfter" stroke="#047857" strokeWidth={2} dot={false} name="VSR" isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -1099,7 +1099,7 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
               )
             })}
             {(() => {
-              const price2023 = roundedPrice(scenarioData.precos.estresse_baixo / 1_000_000)
+              const price2023 = scenarioData.precos.estresse_baixo / 1_000_000
               const result = interpolate(scenarioData.grade, variants.base.stats.p50, price2023) ?? 0
               const selected = variant === 'base' && Math.abs(price - price2023) < 0.05
               return <button onClick={select2023Price} aria-pressed={selected} className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${selected ? 'border-red-700 bg-red-50 text-red-800' : 'border-slate-300 text-slate-700 hover:border-red-700 hover:text-red-800'}`}>Nível de 2023 · {signedMi(result)}</button>
@@ -1150,6 +1150,10 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
             </div>
           </section>
         </section>
+        <a href="/PoliVSR_Relatorio_Metodologia.pdf" download="PoliVSR_Relatorio_Metodologia.pdf" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-red-800">
+          <Download aria-hidden="true" className="h-4 w-4" />
+          Baixar metodologia estatística (PDF)
+        </a>
       </main>
       <PageEndNavigation active="simulator" onNavigate={onNavigate} />
     </>
