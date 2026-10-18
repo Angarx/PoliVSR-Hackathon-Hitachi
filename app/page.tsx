@@ -11,6 +11,8 @@ import {
   Legend,
   Line,
   LineChart,
+  ReferenceArea,
+  ReferenceDot,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -18,6 +20,7 @@ import {
   YAxis,
 } from 'recharts'
 import {
+  Building2,
   ArrowRight,
   ChevronDown,
   CircleDollarSign,
@@ -25,14 +28,14 @@ import {
   FileText,
   Menu,
   UsersRound,
+  Wind,
+  Zap,
   X,
 } from 'lucide-react'
 import siteCalculator from '@/lib/dados/site_calculadora.json'
-import riskFan from '@/lib/dados/nevoa.json'
 import { IDADE, MMGD, REAT, REG, SET25, SET26, TOTAL_DIA, VERAO } from '@/lib/dados/inicio'
 
 const model: any = siteCalculator
-const riskRows: any[] = riskFan
 const numberFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 })
 const integerFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 })
 const percentFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 })
@@ -47,6 +50,24 @@ const REFERENCE_URLS = {
     'https://www.e-cigre.org/publications/detail/a3-10747-2026-shunt-reactor-switching-in-brazilian-grid-a-critical-analysis-of-circuit-breaker-standard-requirements-and-the-actual-stresses-in-the-network.html',
   parpel: 'https://www.ons.org.br/AcervoDigitalDocumentosEPublicacoes/Revista%20PARPEL%202025-VF.pdf',
   aneel: 'https://www.gov.br/aneel/pt-br',
+}
+
+const cascadeLabels: Record<string, string> = {
+  'CAPEX vão': 'Vão de manobra evitado',
+  'Fase reserva do fixo': 'Fases reserva evitadas',
+  'Prêmio do VSR': 'Prêmio do VSR sobre os fixos',
+  'Troca do disjuntor': 'Troca de disjuntor adiada',
+  'O&M do vão': 'O&M do vão evitado',
+  'Falhas do disjuntor': 'Falhas de disjuntor evitadas',
+  'Revisão geral': 'Revisões gerais evitadas',
+  'Manutenção preventiva': 'Preventivas evitadas',
+  'Manutenção do OLTC': 'Manutenção do OLTC',
+  'Falhas do reator/VSR': 'Falhas do reator e do VSR',
+  'Parcela Variável': 'Parcela Variável (ANEEL)',
+  'Energia não suprida': 'Energia não suprida',
+  Perdas: 'Perdas do VSR',
+  'Reserva do VSR': 'Reserva do VSR',
+  'RAP (ajuste regulatório)': 'Ajuste da RAP',
 }
 
 const curvePoints = [...VERAO, VERAO[0]]
@@ -338,7 +359,6 @@ function Hero({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
               onChange={(event) => setHour(Number(event.target.value) / 2)}
             />
             <div className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-400">
-              <span>0 GW</span>
               <span>{timeLabel(hour)} · {brl(load, 1)} GW</span>
               <span>24h</span>
             </div>
@@ -383,7 +403,7 @@ function HomeCharts() {
           <LineChart data={duckData} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
             <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="hour" tickFormatter={(value) => `${value}h`} ticks={[0, 6, 12, 18]} tick={{ fontSize: 11 }} />
-            <YAxis domain={['dataMin - 3', 'dataMax + 3']} tick={{ fontSize: 11 }} />
+            <YAxis domain={[30, 80]} ticks={[30, 40, 50, 60, 70, 80]} tick={{ fontSize: 11 }} tickFormatter={(value) => integerFormat.format(Number(value))} />
             <Tooltip labelFormatter={(value) => `${value}h`} formatter={(value, name) => [`${numberFormat.format(Number(value))} GW`, name === 'set2026' ? 'set/2026' : 'set/2025']} />
             <Legend formatter={(value) => (value === 'set2026' ? 'set/2026' : 'set/2025')} />
             <Line dataKey="set2025" name="set2025" type="monotone" stroke="#94a3b8" strokeWidth={2} dot={false} />
@@ -475,7 +495,7 @@ function SavingsSection({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
         <div className="grid gap-4 border-t border-slate-800 pt-5 sm:grid-cols-2">
           <div>
             <h3 className="text-sm font-bold text-slate-200">Condições do caso-base</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-400">Fixo com fase reserva por banco, padrão EPE; OLTC a vácuo; reserva do VSR em pool. A visão do SIN é positiva nos três cenários.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">Fixo com fase reserva por banco, padrão EPE; OLTC a vácuo; VSR com unidade reserva compartilhada (pool). A visão do SIN é positiva nos três cenários.</p>
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-200">Casos que não compensam</h3>
@@ -693,8 +713,8 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
   const [scenario, setScenario] = useState('campo')
   const [view, setView] = useState<View>('concessionaria')
   const [variant, setVariant] = useState('base')
-  const [price, setPrice] = useState(model.cenarios.campo.precos.base / 1_000_000)
-  const [mobileMenu, setMobileMenu] = useState(false)
+  const [price, setPrice] = useState(() => Math.round((model.cenarios.campo.precos.base / 1_000_000) / 0.5) * 0.5)
+  const resultsRef = useRef<HTMLElement>(null)
   const scenarioData = model.cenarios[scenario]
   const variants = scenarioData.visoes[view].variantes
   const variantKeys = Object.keys(variants)
@@ -709,47 +729,68 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
   const breakEven = activeVariant.equilibrio_mi[1]
   const operation = Math.round(scenarioData.oper.ops_fixo_ano - scenarioData.oper.ops_vsr_ano)
   const options = Object.entries(variants) as [string, any][]
+  const priceStep = scenarioData.kv === 500 ? 0.5 : 0.1
+  const roundedPrice = (value: number) => Math.round(value / priceStep) * priceStep
+  const pricePremium = price / (scenarioData.preco_fixos / 1_000_000) - 1
   const chartData = scenarioData.grade.map((grid: number, index: number) => ({
     price: grid,
     p10: stats.p10[index],
     p50: stats.p50[index],
     p90: stats.p90[index],
+    band: stats.p90[index] - stats.p10[index],
   }))
   const fanData = useMemo(() => {
-    const rows = riskRows.filter((row) => row.cenario === scenario && row.visao === view)
-    const priceDelta = price - model.cenarios[scenario].precos.base / 1_000_000
-    return Array.from({ length: model.meta.horizonte_anos + 1 }, (_, year) => {
-      const byAlternative = (alternative: string) => rows.find((row) => row.ano === year && row.alternativa === alternative)
-      const fixed = byAlternative('fixo')
-      const vsr = byAlternative('vsr')
+    const risk = scenarioData.visoes[view].nevoa
+    return risk.anos.map((year: number, index: number) => {
+      const vsrAtPrice = (quantile: string) =>
+        interpolate(scenarioData.grade, risk.vsr[quantile].map((values: number[]) => values[index]), price) ?? 0
       return {
         year,
-        fixoP10: fixed?.p10 / 1_000_000,
-        fixoFaixa: (fixed?.p90 - fixed?.p10) / 1_000_000,
-        fixoP50: fixed?.p50 / 1_000_000,
-        vsrP10: vsr?.p10 / 1_000_000 + priceDelta,
-        vsrFaixa: (vsr?.p90 - vsr?.p10) / 1_000_000,
-        vsrP50: vsr?.p50 / 1_000_000 + priceDelta,
+        fixoP10: risk.fixo.p10[index],
+        fixoP50: risk.fixo.p50[index],
+        fixoP90: risk.fixo.p90[index],
+        vsrP10: vsrAtPrice('p10'),
+        vsrP50: vsrAtPrice('p50'),
+        vsrP90: vsrAtPrice('p90'),
+        fixoBand: risk.fixo.p90[index] - risk.fixo.p10[index],
+        vsrBand: vsrAtPrice('p90') - vsrAtPrice('p10'),
       }
     })
-  }, [price, scenario, view])
-  const typicalDay = scenarioData.dia.hora.map((hour: number, index: number) => ({
+  }, [price, scenarioData, view])
+  const fanValues = fanData.flatMap((point: any) => [point.fixoP10, point.fixoP90, point.vsrP10, point.vsrP90])
+  const fanYMin = Math.floor((Math.min(...fanValues) - 1) / 5) * 5
+  const fanYMax = Math.ceil((Math.max(...fanValues) + 1) / 5) * 5
+  const fanTicks = Array.from({ length: Math.floor((fanYMax - fanYMin) / 5) + 1 }, (_, index) => fanYMin + index * 5)
+  const fanEnd = fanData[fanData.length - 1]
+  const typicalDayPoints = scenarioData.dia.hora.map((hour: number, index: number) => ({
     hour,
-    carga: scenarioData.dia.r[index],
+    need: scenarioData.dia.r[index],
     fixo: scenarioData.dia.fixo[index],
     vsr: scenarioData.dia.vsr[index],
   }))
-  const cascade = activeVariant.cascata.map((item: any) => ({ name: item.c, value: item.a - item.b }))
+  const typicalDay = [...typicalDayPoints, { ...typicalDayPoints.at(-1), hour: 24 }]
+  const dayDate = scenarioData.dia.data.split('-').reverse().join('/')
+  const cascadeRows = activeVariant.cascata
+    .map((item: any) => ({
+      name: cascadeLabels[item.c] ?? item.c,
+      value: item.a + item.b * pricePremium,
+    }))
+    .filter((item: any) => Math.abs(item.value) >= 0.005)
+    .sort((first: any, second: any) => second.value - first.value)
+  const cascadeTotal = cascadeRows.reduce((total: number, item: any) => total + item.value, 0)
+  const cascadeScale = Math.max(...cascadeRows.map((item: any) => Math.abs(item.value)), Math.abs(cascadeTotal), 0.01)
   const savingsScenarios = [
-    { id: 'campo', name: 'Campo', icon: '500 kV' },
-    { id: 'polo_eolico', name: 'Polo eólico', icon: '500 kV' },
-    { id: 'urbano', name: 'Centro Urbano', icon: '230 kV' },
+    { id: 'campo', icon: Zap },
+    { id: 'polo_eolico', icon: Wind },
+    { id: 'urbano', icon: Building2 },
   ]
 
   const chooseScenario = (id: string) => {
+    const data = model.cenarios[id]
+    const step = data.kv === 500 ? 0.5 : 0.1
     setScenario(id)
     setVariant('base')
-    setPrice(model.cenarios[id].precos.base / 1_000_000)
+    setPrice(Math.round((data.precos.base / 1_000_000) / step) * step)
   }
 
   const chooseView = (nextView: View) => {
@@ -761,11 +802,24 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
     if (variants[key]) setVariant(key)
   }
 
+  const selectPremiseResult = (key: string) => {
+    if (!variants[key]) return
+    setVariant(key)
+    setPrice(scenarioData.precos.base / 1_000_000)
+    resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const select2023Price = () => {
+    setVariant('base')
+    setPrice(roundedPrice(scenarioData.precos.estresse_baixo / 1_000_000))
+    resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const priceChips = [
-    { label: 'Base', value: scenarioData.precos.base / 1_000_000 },
-    { label: 'Contratos · menor', value: scenarioData.precos.baixo / 1_000_000 },
-    { label: 'Contratos · maior', value: scenarioData.precos.alto / 1_000_000 },
-    { label: 'Preço de 2023', value: scenarioData.precos.estresse_baixo / 1_000_000 },
+    { label: 'Contratos 2025–26', value: roundedPrice(scenarioData.precos.base / 1_000_000) },
+    { label: 'Faixa baixa', value: roundedPrice(scenarioData.precos.baixo / 1_000_000) },
+    { label: 'Faixa alta', value: roundedPrice(scenarioData.precos.alto / 1_000_000) },
+    { label: 'Nível de 2023', value: roundedPrice(scenarioData.precos.estresse_baixo / 1_000_000) },
   ]
 
   return (
@@ -783,25 +837,31 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
         <div className="mt-8 grid gap-6 lg:grid-cols-[.78fr_1.22fr]">
           <aside className="flex min-w-0 flex-col gap-6">
             <section>
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-950">Cenário</h2>
-                <button className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 lg:hidden" onClick={() => setMobileMenu(!mobileMenu)} aria-expanded={mobileMenu}>
-                  {mobileMenu ? 'Fechar' : 'Cenários'} <ChevronDown className="h-4 w-4" />
-                </button>
-              </div>
-              <div className={`${mobileMenu ? 'grid' : 'hidden'} mt-3 gap-2 lg:grid`}>
+              <h2 className="text-lg font-bold text-slate-950">Cenário</h2>
+              <div className="mt-3 grid gap-2">
                 {savingsScenarios.map((choice) => {
                   const selected = scenario === choice.id
                   const data = model.cenarios[choice.id]
+                  const ScenarioIcon = choice.icon
+                  const spark = data.dia.r.map((value: number, index: number) => {
+                    const x = (index / (data.dia.r.length - 1)) * 100
+                    const y = 22 - value * 17
+                    return `${x},${y}`
+                  }).join(' ')
                   return (
-                    <button key={choice.id} onClick={() => chooseScenario(choice.id)} aria-pressed={selected} className={`rounded-2xl border p-4 text-left transition ${selected ? 'border-slate-950 bg-slate-950 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-800 hover:border-slate-400'}`}>
-                      <span className="flex items-center justify-between gap-2">
-                        <strong className="text-base">{data.nome}</strong>
-                        <span className={`rounded-full px-2 py-1 text-[11px] font-bold ${selected ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-600'}`}>{choice.icon}</span>
+                    <button key={choice.id} onClick={() => chooseScenario(choice.id)} aria-pressed={selected} className={`grid grid-cols-[auto_minmax(0,1fr)_80px] items-center gap-3 rounded-2xl border p-4 text-left transition ${selected ? 'border-slate-950 bg-slate-950 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-800 hover:border-slate-400'}`}>
+                      <span className={`grid h-10 w-10 place-items-center rounded-xl ${selected ? 'bg-slate-800 text-red-300' : 'bg-slate-100 text-red-700'}`}>
+                        <ScenarioIcon aria-hidden="true" className="h-5 w-5" />
                       </span>
-                      <span className={`mt-2 block text-xs leading-5 ${selected ? 'text-slate-300' : 'text-slate-500'}`}>
-                        {choice.id === 'urbano' ? 'Base: carga líquida do Nordeste · 230 kV' : data.base}
+                      <span className="min-w-0">
+                        <strong className="block text-base">{data.nome}</strong>
+                        <span className={`mt-1 block text-xs leading-5 ${selected ? 'text-slate-300' : 'text-slate-500'}`}>
+                          {choice.id === 'urbano' ? 'Base: carga líquida do Nordeste · 230 kV' : data.base}
+                        </span>
                       </span>
+                      <svg aria-hidden="true" className="h-8 w-20" viewBox="0 0 100 24" preserveAspectRatio="none">
+                        <polyline points={spark} fill="none" stroke={selected ? '#fda4af' : '#94a3b8'} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                      </svg>
                     </button>
                   )
                 })}
@@ -821,7 +881,7 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
                 type="range"
                 min={scenarioData.grade[0]}
                 max={scenarioData.grade[scenarioData.grade.length - 1]}
-                step="0.1"
+                step={priceStep}
                 value={price}
                 aria-label="Preço do VSR em milhões de reais"
                 onChange={(event) => setPrice(Number(event.target.value))}
@@ -834,6 +894,9 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
                   </button>
                 ))}
               </div>
+              <p className="mt-3 text-xs leading-5 text-slate-500">
+                Prêmio de {pricePremium >= 0 ? '+' : '−'}{integerFormat.format(Math.abs(pricePremium * 100))}% sobre os dois fixos (R$ {brl(scenarioData.preco_fixos / 1_000_000)} mi de referência).
+              </p>
             </section>
 
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -845,7 +908,7 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
             </section>
           </aside>
 
-          <section className="min-w-0">
+          <section ref={resultsRef} className="min-w-0 scroll-mt-24">
             <h2 className="sr-only">Resultados estimados</h2>
             <div className="grid grid-cols-2 gap-3">
               <article className="rounded-2xl bg-slate-950 p-4 text-white sm:p-5">
@@ -878,116 +941,171 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
               <MetricTile label="Manutenção do OLTC" value={`${numberFormat.format(scenarioData.oper.anos_entre_manut_oltc)} anos`} detail="intervalo estimado" />
             </div>
 
-            <ChartCard className="mt-6" title="A névoa do risco" subtitle={`Fluxo acumulado em ${model.meta.horizonte_anos} anos · faixa P10–P90 · preço atual`}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={fanData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                  <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="year" tick={{ fontSize: 11 }} tickFormatter={(value) => `${value}a`} />
-                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(value) => `${numberFormat.format(Number(value))}`} />
-                  <Tooltip labelFormatter={(value) => `Ano ${value}`} formatter={(value, name) => [`R$ ${brl(Number(value))} mi`, name]} />
-                  <Legend />
-                  <Area dataKey="fixoP10" stackId="fixo" stroke="none" fill="transparent" name="Fixo P10" />
-                  <Area dataKey="fixoFaixa" stackId="fixo" stroke="#be123c" fill="#fda4af" fillOpacity={0.25} name="Fixo P10–P90" />
-                  <Area dataKey="vsrP10" stackId="vsr" stroke="none" fill="transparent" name="VSR P10" />
-                  <Area dataKey="vsrFaixa" stackId="vsr" stroke="#047857" fill="#6ee7b7" fillOpacity={0.25} name="VSR P10–P90" />
-                  <Line dataKey="fixoP50" type="monotone" stroke="#be123c" strokeWidth={2} dot={false} name="Fixo P50" />
-                  <Line dataKey="vsrP50" type="monotone" stroke="#047857" strokeWidth={2} dot={false} name="VSR P50" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartCard>
+            <article className="mt-6 min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+              <h3 className="text-lg font-bold text-slate-900">A névoa do risco</h3>
+              <p className="mt-1 text-sm leading-5 text-slate-500">Custo acumulado descontado · R$ mi · anos 0–{model.meta.horizonte_anos} · preço atual</p>
+              {variant !== 'base' && <p className="mt-2 text-xs leading-5 text-slate-500">As faixas mostram o caso-base do cenário; os demais resultados seguem a premissa selecionada.</p>}
+              <div className="mt-4 h-72 w-full min-w-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={fanData} margin={{ top: 8, right: 116, left: -12, bottom: 0 }}>
+                    <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="year" ticks={[0, 5, 10, 15, 20, 25, 30]} tick={{ fontSize: 11 }} tickFormatter={(value) => `${value}a`} />
+                    <YAxis domain={[fanYMin, fanYMax]} ticks={fanTicks} tick={{ fontSize: 11 }} tickFormatter={(value) => numberFormat.format(Number(value))} />
+                    <Tooltip labelFormatter={(value) => `Ano ${value}`} formatter={(value, name) => [`R$ ${brl(Number(value))} mi`, name]} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Area dataKey="fixoP10" stackId="fixo" stroke="none" fill="transparent" legendType="none" name="Reator fixo P10" />
+                    <Area dataKey="fixoBand" stackId="fixo" stroke="none" fill="#fda4af" fillOpacity={0.48} name="Reator fixo P10–P90" />
+                    <Area dataKey="vsrP10" stackId="vsr" stroke="none" fill="transparent" legendType="none" name="VSR P10" />
+                    <Area dataKey="vsrBand" stackId="vsr" stroke="none" fill="#6ee7b7" fillOpacity={0.5} name="VSR P10–P90" />
+                    <Line dataKey="fixoP50" type="monotone" stroke="#be123c" strokeWidth={2} dot={false} name="Reator fixo P50" />
+                    <Line dataKey="vsrP50" type="monotone" stroke="#047857" strokeWidth={2} dot={false} name="VSR P50" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
+                <span className="text-rose-700">Reator fixo R$ {brl(fanEnd.fixoP50)} mi</span>
+                <span className="text-emerald-700">VSR R$ {brl(fanEnd.vsrP50)} mi</span>
+              </div>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full border-collapse text-left text-xs sm:text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500">
+                      <th className="py-2 pr-2 font-semibold">Ano</th>
+                      <th className="px-2 py-2 text-right font-semibold">Reator fixo</th>
+                      <th className="px-2 py-2 text-right font-semibold">VSR</th>
+                      <th className="py-2 pl-2 text-right font-semibold">Diferença</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[1, 5, 10, 20, 30].map((year) => {
+                      const point = fanData.find((item: any) => item.year === year)
+                      if (!point) return null
+                      return (
+                        <tr key={year} className="border-b border-slate-100 last:border-0">
+                          <th className="py-2 pr-2 font-semibold text-slate-700">{year}</th>
+                          <td className="px-2 py-2 text-right text-slate-600">R$ {brl(point.fixoP50)} mi</td>
+                          <td className="px-2 py-2 text-right text-slate-600">R$ {brl(point.vsrP50)} mi</td>
+                          <td className="py-2 pl-2 text-right font-semibold text-slate-700">{signedMi(point.fixoP50 - point.vsrP50)}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </article>
           </section>
         </div>
 
-        <section className="mt-8 grid gap-6 lg:grid-cols-2">
-          <ChartCard title="VPL × preço" subtitle="VPL em R$ milhões · premissas selecionadas">
+        <section className="mt-8 min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <h2 className="text-lg font-bold text-slate-900">VPL × preço</h2>
+          <p className="mt-1 text-sm leading-5 text-slate-500">VPL mediano e faixa P10–P90 · premissas selecionadas</p>
+          <div className="mt-4 h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
+              <AreaChart data={chartData} margin={{ top: 28, right: 12, bottom: 4, left: -12 }}>
                 <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="price" tick={{ fontSize: 11 }} tickFormatter={(value) => `${value}`} />
-                <YAxis tick={{ fontSize: 11 }} />
+                <XAxis type="number" dataKey="price" domain={[scenarioData.grade[0], scenarioData.grade.at(-1)]} tick={{ fontSize: 11 }} tickFormatter={(value) => numberFormat.format(Number(value))} />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={(value) => numberFormat.format(Number(value))} />
                 <Tooltip labelFormatter={(value) => `Preço: R$ ${brl(Number(value))} mi`} formatter={(value, name) => [`R$ ${brl(Number(value))} mi`, name]} />
-                <Legend />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <ReferenceArea x1={scenarioData.precos.baixo / 1_000_000} x2={scenarioData.precos.alto / 1_000_000} fill="#059669" fillOpacity={0.08} stroke="none" />
                 <ReferenceLine x={price} stroke="#0f172a" strokeDasharray="4 4" />
                 <ReferenceLine y={0} stroke="#94a3b8" />
-                <Line dataKey="p10" type="monotone" stroke="#94a3b8" strokeWidth={1.5} dot={false} name="P10" />
-                <Line dataKey="p50" type="monotone" stroke="#b91c1c" strokeWidth={2.5} dot={false} name="P50" />
-                <Line dataKey="p90" type="monotone" stroke="#64748b" strokeWidth={1.5} dot={false} name="P90" />
-              </LineChart>
+                <Area dataKey="p10" stackId="range" stroke="none" fill="transparent" legendType="none" name="P10" />
+                <Area dataKey="band" stackId="range" stroke="none" fill="#6ee7b7" fillOpacity={0.3} name="P10–P90" />
+                <Line dataKey="p50" type="monotone" stroke="#047857" strokeWidth={2.5} dot={false} name="VPL mediano" />
+                <ReferenceDot x={breakEven} y={0} r={4} fill="#0f172a" stroke="white" label={{ value: `Equilíbrio R$ ${brl(breakEven)} mi`, position: 'top', fill: '#0f172a', fontSize: 11 }} />
+                <ReferenceDot x={price} y={p50} r={5} fill="#047857" stroke="white" strokeWidth={2} />
+              </AreaChart>
             </ResponsiveContainer>
-          </ChartCard>
-          <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-bold text-slate-950">Tabela de preço e resultado</h2>
-            <p className="mt-1 text-sm text-slate-500">Valores interpolados do modelo para o preço selecionado.</p>
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[420px] border-collapse text-left text-sm">
-                <thead><tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500"><th className="py-3 pr-3">Indicador</th><th className="px-3 py-3 text-right">Valor</th><th className="py-3 pl-3 text-right">Referência</th></tr></thead>
-                <tbody>
-                  <tr className="border-b border-slate-100"><th className="py-3 pr-3 font-semibold text-slate-700">Preço do VSR</th><td className="px-3 py-3 text-right">R$ {brl(price)} mi</td><td className="py-3 pl-3 text-right text-slate-500">R$ {brl(scenarioData.precos.base / 1_000_000)} mi</td></tr>
-                  <tr className="border-b border-slate-100"><th className="py-3 pr-3 font-semibold text-slate-700">VPL P10</th><td className="px-3 py-3 text-right">{signedMi(p10)}</td><td className="py-3 pl-3 text-right text-slate-500">R$ de set/2026</td></tr>
-                  <tr className="border-b border-slate-100"><th className="py-3 pr-3 font-semibold text-slate-700">VPL P50</th><td className="px-3 py-3 text-right">{signedMi(p50)}</td><td className="py-3 pl-3 text-right text-slate-500">{percentFormat.format(chance * 100)}% positivos</td></tr>
-                  <tr><th className="py-3 pr-3 font-semibold text-slate-700">VPL P90</th><td className="px-3 py-3 text-right">{signedMi(p90)}</td><td className="py-3 pl-3 text-right text-slate-500">R$ de set/2026</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-4 text-xs leading-5 text-slate-500">Preço de equilíbrio P50: R$ {brl(breakEven)} mi. As taxas do modelo são 12,11% a.a. real, antes de impostos, para a transmissora; no SIN, {brl(model.meta.taxa_sin * 100, 1)}% a.a. real.</p>
-          </section>
+          </div>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full border-collapse text-left text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-500">
+                  <th className="py-2 pr-2 font-semibold">Preço</th>
+                  <th className="px-2 py-2 text-right font-semibold">Prêmio sobre os dois fixos</th>
+                  <th className="py-2 pl-2 text-right font-semibold">VPL mediano</th>
+                </tr>
+              </thead>
+              <tbody>
+                {priceChips.map((chip) => {
+                  const premium = chip.value / (scenarioData.preco_fixos / 1_000_000) - 1
+                  const median = interpolate(scenarioData.grade, stats.p50, chip.value) ?? 0
+                  return (
+                    <tr key={chip.label} className="border-b border-slate-100 last:border-0">
+                      <th className="py-2 pr-2 font-semibold text-slate-700">
+                        {chip.label}<span className="block font-normal text-slate-500">R$ {brl(chip.value)} mi</span>
+                      </th>
+                      <td className="px-2 py-2 text-right text-slate-600">{premium >= 0 ? '+' : '−'}{integerFormat.format(Math.abs(premium * 100))}%</td>
+                      <td className="py-2 pl-2 text-right font-semibold text-slate-800">{signedMi(median)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-xs leading-5 text-slate-500">Preço de equilíbrio P50: R$ {brl(breakEven)} mi · taxas do modelo: transmissora a 12,11% a.a. real, antes de impostos; SIN a {brl(model.meta.taxa_sin * 100, 1)}% a.a. real.</p>
         </section>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-2">
-          <ChartCard title="Dia típico" subtitle={`Carga líquida e estados de operação · ${scenarioData.dia.data}`}>
+          <ChartCard title="Dia típico" subtitle={`Dia típico (${dayDate}): o fixo manobrou ${scenarioData.dia.manobras_fixo} vezes; o VSR, ${scenarioData.dia.manobras_vsr}, acompanhando a rede com ${scenarioData.dia.taps_vsr} trocas de tap.`}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={typicalDay} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
                 <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="hour" tick={{ fontSize: 11 }} tickFormatter={(value) => timeLabel(Number(value))} interval={7} />
-                <YAxis tick={{ fontSize: 11 }} domain={[0, 'dataMax + 0.1']} />
-                <Tooltip labelFormatter={(value) => timeLabel(Number(value))} formatter={(value, name) => [numberFormat.format(Number(value)), name]} />
+                <XAxis type="number" dataKey="hour" domain={[0, 24]} ticks={[0, 6, 12, 18, 24]} interval={0} tick={{ fontSize: 11 }} tickFormatter={(value) => `${String(Number(value)).padStart(2, '0')}h`} />
+                <YAxis type="number" domain={[0, 1]} ticks={[0, 0.5, 1]} tick={{ fontSize: 11 }} tickFormatter={(value) => `${Math.round(Number(value) * 100)}%`} />
+                <Tooltip labelFormatter={(value) => timeLabel(Number(value))} formatter={(value, name) => [`${Math.round(Number(value) * 100)}%`, name]} />
                 <Legend />
-                <Line dataKey="carga" type="monotone" stroke="#334155" strokeWidth={2} dot={false} name="Carga líquida" />
-                <Line dataKey="fixo" type="stepAfter" stroke="#b91c1c" strokeWidth={2} dot={false} name="Banco fixo" />
+                <Line dataKey="need" type="monotone" stroke="#64748b" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Necessidade" />
+                <Line dataKey="fixo" type="stepAfter" stroke="#b91c1c" strokeWidth={2} dot={false} name="Reator fixo" />
                 <Line dataKey="vsr" type="stepAfter" stroke="#047857" strokeWidth={2} dot={false} name="VSR" />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title="De onde vem o resultado" subtitle="Contribuição por componente · R$ milhões">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cascade} layout="vertical" margin={{ top: 4, right: 10, bottom: 0, left: 6 }}>
-                <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={124} tick={{ fontSize: 10 }} />
-                <ReferenceLine x={0} stroke="#64748b" />
-                <Tooltip formatter={(value) => [`R$ ${brl(Number(value))} mi`, 'Contribuição']} />
-                <Bar dataKey="value" name="Contribuição" radius={[0, 4, 4, 0]}>
-                  {cascade.map((item: any) => <Cell key={item.name} fill={item.value >= 0 ? '#047857' : '#b91c1c'} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
+          <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+            <h3 className="text-lg font-bold text-slate-900">De onde vem o resultado</h3>
+            <p className="mt-1 text-sm leading-5 text-slate-500">Contribuição por componente · R$ mi</p>
+            <div className="mt-4 space-y-3">
+              {[...cascadeRows, { name: 'VPL médio', value: cascadeTotal, total: true }].map((item: any) => {
+                const width = (Math.abs(item.value) / cascadeScale) * 50
+                return (
+                  <div key={item.name} className={`grid grid-cols-[minmax(0,1fr)_72px_92px] items-center gap-2 ${item.total ? 'border-t border-slate-200 pt-3 font-bold' : ''}`}>
+                    <span className={`break-words text-xs leading-4 ${item.total ? 'text-slate-900' : 'text-slate-600'}`}>{item.name}</span>
+                    <span className="relative h-3 rounded-full bg-slate-100">
+                      <span className={`absolute top-0 h-3 rounded-full ${item.value >= 0 ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ width: `${width}%`, left: item.value >= 0 ? '50%' : `${50 - width}%` }} />
+                    </span>
+                    <span className={`whitespace-nowrap text-right text-xs tabular-nums ${item.total ? 'text-slate-900' : 'text-slate-600'}`}>{signedMi(item.value)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </article>
         </section>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
-            Campo, cascata do caso-base: vão R$ 13,0 mi; fase reserva R$ 9,0 mi; O&M do vão R$ 1,0 mi. Desgaste e falhas ficam em torno de R$ 0,3 mi.
-          </p>
-          <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
-            Manobras evitadas = operações do fixo menos operações do VSR, por ano. O caso selecionado mostra {integerFormat.format(operation)}.
-          </p>
-        </div>
 
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 className="text-xl font-bold text-slate-950">Casos sem vantagem financeira</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">As variantes abaixo fazem parte do modelo. Escolha uma premissa no seletor para atualizar resultados e cascata; o preço de 2023 está disponível nos chips.</p>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">VPL P50 de cada caso para o cenário e a visão selecionados.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {[
-              { key: 'reforco', label: 'Reforço autorizado pelo BPR · −R$ 4,4 mi' },
-              { key: 'res13', label: 'Reserva própria 1:3 · −R$ 5,6 mi' },
+              { key: 'reforco', label: 'Reforço autorizado pelo Banco de Preços' },
+              { key: 'res13', label: 'Reserva própria 1:3' },
               { key: 'fase_nenhuma', label: 'Fixo sem fase reserva' },
-            ].map((item) => (
-              <button key={item.key} disabled={!variants[item.key]} onClick={() => selectVariant(item.key)} className="rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 enabled:hover:border-red-700 enabled:hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-40">
-                {item.label}
-              </button>
-            ))}
-            <button onClick={() => setPrice(scenarioData.precos.estresse_baixo / 1_000_000)} className="rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-700 hover:text-red-800">Preço de 2023 · −R$ 29,5 mi</button>
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">Troca 1 por 1 sem vão evitado</span>
+            ].filter((item) => variants[item.key]).map((item) => {
+              const result = interpolate(scenarioData.grade, variants[item.key].stats.p50, scenarioData.precos.base / 1_000_000) ?? 0
+              return (
+                <button key={item.key} aria-pressed={variant === item.key} onClick={() => selectPremiseResult(item.key)} className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${variant === item.key ? 'border-red-700 bg-red-50 text-red-800' : 'border-slate-300 text-slate-700 hover:border-red-700 hover:text-red-800'}`}>
+                  {item.label} · {signedMi(result)}
+                </button>
+              )
+            })}
+            {(() => {
+              const price2023 = roundedPrice(scenarioData.precos.estresse_baixo / 1_000_000)
+              const result = interpolate(scenarioData.grade, variants.base.stats.p50, price2023) ?? 0
+              const selected = variant === 'base' && Math.abs(price - price2023) < 0.05
+              return <button onClick={select2023Price} aria-pressed={selected} className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${selected ? 'border-red-700 bg-red-50 text-red-800' : 'border-slate-300 text-slate-700 hover:border-red-700 hover:text-red-800'}`}>Nível de 2023 · {signedMi(result)}</button>
+            })()}
           </div>
+          <p className="mt-3 text-sm text-slate-600">Troca 1 por 1 sem vão evitado.</p>
         </section>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[.85fr_1.15fr]">
@@ -997,7 +1115,18 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
               <li>{integerFormat.format(model.meta.simulacoes)} simulações de Monte Carlo, fluxos mensais em {model.meta.horizonte_anos} anos.</li>
               <li>Valores em {model.meta.moeda}; transmissora: 12,11% a.a. real, antes de impostos.</li>
               <li>Visão do SIN: {brl(model.meta.taxa_sin * 100, 1)}% a.a. real, sem Parcela Variável.</li>
-              <li>Casos-base: fixo com fase reserva por banco, OLTC a vácuo e reserva do VSR em pool.</li>
+              <li>Casos-base: fixo com fase reserva por banco, OLTC a vácuo e VSR com unidade reserva compartilhada (pool).</li>
+            </ul>
+            <h3 className="mt-6 text-base font-bold text-slate-900">O que pesa contra o VSR</h3>
+            <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
+              <li>Preço no nível do contrato de 2023 da Energinet.</li>
+              <li>Reforço autorizado com RAP pelo Banco de Preços da ANEEL.</li>
+              <li>OLTC a óleo, fixo sem fase reserva ou reserva própria de 1 para 3.</li>
+              <li>Preço estimado por contratos europeus; falta cotação para o Brasil.</li>
+            </ul>
+            <h3 className="mt-6 text-base font-bold text-slate-900">O que o modelo não monetiza</h3>
+            <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600">
+              <li>Menos degraus de tensão, regulação contínua para solar e eólica, reserva flexível em vários pontos da rede e menor área ocupada.</li>
             </ul>
           </article>
           <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
