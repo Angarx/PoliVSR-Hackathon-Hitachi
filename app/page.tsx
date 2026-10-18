@@ -1011,8 +1011,8 @@ function SimulatorPage({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
                 <Area dataKey="band" stackId="range" stroke="none" fill="#6ee7b7" fillOpacity={0.3} name="P10–P90" isAnimationActive={false} />
                 <Line dataKey="p50" type="monotone" stroke="#047857" strokeWidth={2.5} dot={false} name="VPL mediano" isAnimationActive={false} />
                 <ReferenceDot x={breakEven} y={0} r={4} fill="#0f172a" stroke="white" label={(labelProps: any) => {
-                  const { cx, cy } = labelProps.viewBox
-                  return <text x={cx + 8} y={cy + 16} fill="#0f172a" fontSize={11} textAnchor="start">{`Equilíbrio R$ ${brl(breakEven)} mi`}</text>
+                  const { x, y, width, height } = labelProps.viewBox
+                  return <text x={x + width + 4} y={y + height + 12} fill="#0f172a" fontSize={11} textAnchor="start">{`Equilíbrio R$ ${brl(breakEven)} mi`}</text>
                 }} />
                 <ReferenceDot x={price} y={p50} r={5} fill="#047857" stroke="white" strokeWidth={2} />
               </AreaChart>
