@@ -36,6 +36,7 @@ type FanPoint = {
   vsrP90: number
   vsrRange: [number, number]
 }
+type InfoTipItem = { label: string; text: string }
 
 const model: any = calculatorData
 const formatters = {
@@ -242,14 +243,20 @@ function PriceButton({ label, price, selected, onSelect }: { label: string; pric
   </button>
 }
 
-function InfoTip({ text }: { text: string }) {
+function InfoTip({ text, items, tone = 'default' }: { text?: string; items?: InfoTipItem[]; tone?: 'default' | 'light' }) {
   const id = useId()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const hoverTimer = useRef<number | null>(null)
   const [pinned, setPinned] = useState(false)
   const [hovered, setHovered] = useState(false)
-  const [position, setPosition] = useState({ left: 12, top: 12 })
+  const [position, setPosition] = useState<{ left: number; top: number; width: number; maxHeight: number | null }>({
+    left: 12,
+    top: 12,
+    width: 300,
+    maxHeight: null,
+  })
+  const content = items ?? (text ? [{ label: '', text }] : [])
   const open = pinned || hovered
 
   useEffect(() => {
@@ -258,12 +265,20 @@ function InfoTip({ text }: { text: string }) {
       const button = buttonRef.current
       if (!button) return
       const rect = button.getBoundingClientRect()
-      const width = Math.min(280, window.innerWidth - 24)
-      const left = Math.max(12, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - 12))
+      const width = Math.max(0, Math.min(300, window.innerWidth - 24))
+      const centeredLeft = rect.left + rect.width / 2 - width / 2
+      const rightAlignedLeft = rect.right - width
+      const preferredLeft = rect.left + rect.width / 2 > window.innerWidth / 2 ? rightAlignedLeft : centeredLeft
+      const left = Math.max(12, Math.min(preferredLeft, window.innerWidth - width - 12))
       const height = popoverRef.current?.getBoundingClientRect().height ?? 120
-      const below = rect.bottom + 8
-      const top = below + height <= window.innerHeight - 12 ? below : Math.max(12, rect.top - height - 8)
-      setPosition({ left, top })
+      const spaceAbove = Math.max(0, rect.top - 20)
+      const spaceBelow = Math.max(0, window.innerHeight - rect.bottom - 20)
+      const placeBelow = height <= spaceBelow || (height > spaceAbove && spaceBelow >= spaceAbove)
+      const maxHeight = Math.max(0, Math.min(window.innerHeight - 24, placeBelow ? spaceBelow : spaceAbove))
+      const visibleHeight = Math.min(height, maxHeight)
+      const preferredTop = placeBelow ? rect.bottom + 8 : rect.top - visibleHeight - 8
+      const top = Math.max(12, Math.min(preferredTop, window.innerHeight - visibleHeight - 12))
+      setPosition({ left, top, width, maxHeight })
     }
     const closeOnOutside = (event: PointerEvent) => {
       const target = event.target
@@ -312,9 +327,13 @@ function InfoTip({ text }: { text: string }) {
         setPinned(value => !value)
         setHovered(false)
       }}
-      onMouseEnter={keepHoverOpen}
-      onMouseLeave={scheduleHoverClose}
-      className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+      onPointerEnter={event => {
+        if (event.pointerType === 'mouse') keepHoverOpen()
+      }}
+      onPointerLeave={event => {
+        if (event.pointerType === 'mouse') scheduleHoverClose()
+      }}
+      className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${tone === 'light' ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
     >
       <Info aria-hidden="true" size={18} />
     </button>
@@ -324,12 +343,21 @@ function InfoTip({ text }: { text: string }) {
         id={id}
         role="tooltip"
         data-infotip-popover
-        onMouseEnter={keepHoverOpen}
-        onMouseLeave={scheduleHoverClose}
-        style={{ left: position.left, top: position.top }}
-        className="fixed z-[70] max-w-[min(280px,calc(100vw-24px))] rounded-lg border border-gray-200 bg-white p-3 text-sm leading-5 text-slate-600 shadow-lg"
+        onPointerEnter={event => {
+          if (event.pointerType === 'mouse') keepHoverOpen()
+        }}
+        onPointerLeave={event => {
+          if (event.pointerType === 'mouse') scheduleHoverClose()
+        }}
+        style={{ left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight ?? 'calc(100vh - 24px)' }}
+        className="fixed z-[70] max-w-[min(300px,calc(100vw-24px))] max-h-[calc(100vh-24px)] overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 text-sm leading-5 text-slate-600 shadow-lg"
       >
-        {text}
+        <div className="space-y-2">
+          {content.map((item, index) => <p key={`${item.label}-${index}`}>
+            {item.label && <strong className="font-bold text-slate-800">{item.label}: </strong>}
+            {item.text}
+          </p>)}
+        </div>
       </div>,
       document.body,
     )}
@@ -554,9 +582,7 @@ export default function CustoDoFixo() {
           </tr>)}</tbody>
         </table>
       </div>
-      <div className="mt-2 flex items-center gap-1">
-        <InfoTip text={methodScale} />
-      </div>
+      <p className="mt-2 text-[11px] leading-4 text-slate-500">{methodScale}</p>
     </div>
   </div>
 
@@ -615,8 +641,8 @@ export default function CustoDoFixo() {
     <div className="mx-auto max-w-7xl">
       <header className="mb-8 max-w-3xl">
         <p className="text-center text-xs font-bold uppercase tracking-[.25em] text-red-600">Simulação financeira</p>
-        <div className="mt-3 flex items-start gap-2">
-          <h1 className="text-3xl font-black tracking-tight sm:text-5xl">O Custo do Fixo: Simulador Estocástico do VSR</h1>
+        <div className="mt-3 flex items-start justify-between gap-3">
+          <h1 className="min-w-0 flex-1 text-3xl font-black tracking-tight sm:text-5xl">O Custo do Fixo: Simulador Estocástico do VSR</h1>
           <InfoTip text={`Modelo PoliVSR · ${numberText(model.meta.simulacoes)} simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · ${model.meta.moeda}`} />
         </div>
       </header>
@@ -624,7 +650,7 @@ export default function CustoDoFixo() {
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(280px,.82fr)_minmax(0,1.18fr)]">
         <div className="flex min-w-0 flex-col gap-4">
           <section aria-labelledby="scenario-title">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between gap-2">
               <h2 id="scenario-title" className="text-lg font-bold">Cenário operacional</h2>
               <InfoTip text="Selecione o cenário da sua rede. A curva é a necessidade de reativo manobrável num dia típico do cenário." />
             </div>
@@ -639,15 +665,19 @@ export default function CustoDoFixo() {
           </section>
 
           <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5" aria-labelledby="inputs-title">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between gap-2">
               <h2 id="inputs-title" className="text-lg font-bold">Parâmetros da banca</h2>
-              <InfoTip text={`Unidade comparada: 1 VSR de ${numberText(scenario.W)}–${numberText(scenario.mvar_vsr)} Mvar no lugar de 2 bancos fixos de ${numberText(scenario.W)} Mvar, cada um com seu vão (arranjo 2:1, ${scenario.kv} kV).`} />
+              <InfoTip items={[
+                { label: 'Unidade comparada', text: `1 VSR de ${numberText(scenario.W)}–${numberText(scenario.mvar_vsr)} Mvar no lugar de 2 bancos fixos de ${numberText(scenario.W)} Mvar, cada um com seu vão (arranjo 2:1, ${scenario.kv} kV).` },
+                { label: 'Quem avalia', text: selectedViewHelp },
+                { label: 'Preço do VSR', text: `Prêmio de ${signedPercentage(premium)} sobre os dois reatores fixos que ele substitui (${mi(fixedMi)} no preço de referência da EPE).` },
+                { label: 'Preço dos reatores fixos', text: fixedPriceMethod },
+              ]} />
             </div>
             <div className="mt-4 flex flex-col gap-4">
               <div>
                 <div className="mb-2 flex items-center gap-1">
                   <p className="text-sm font-semibold text-slate-700">Quem avalia</p>
-                  <InfoTip text={selectedViewHelp} />
                 </div>
                 <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1" role="group" aria-label="Quem avalia">
                   <button type="button" aria-pressed={viewId === 'concessionaria'} onClick={() => selectView('concessionaria')} className={`min-h-10 rounded-md px-2 text-sm font-semibold transition-colors ${viewId === 'concessionaria' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600 hover:text-slate-950'}`}>Transmissora</button>
@@ -658,7 +688,6 @@ export default function CustoDoFixo() {
               <div>
                 <div className="flex items-center gap-1">
                   <label htmlFor="vsr-price" className="text-sm font-semibold text-slate-700">Preço do VSR, só equipamento</label>
-                  <InfoTip text={`Prêmio de ${signedPercentage(premium)} sobre os dois reatores fixos que ele substitui (${mi(fixedMi)} no preço de referência da EPE).`} />
                   <strong className="ml-auto whitespace-nowrap text-sm text-slate-950">{mi(price)}</strong>
                 </div>
                 <input
@@ -687,8 +716,7 @@ export default function CustoDoFixo() {
               <div className="border-t border-gray-100 pt-4">
                 <div className="flex items-center gap-1">
                   <label htmlFor="fixed-price" className="text-sm font-semibold text-slate-700">Preço dos 2 reatores fixos</label>
-                  <InfoTip text={fixedPriceMethod} />
-                  <strong className="ml-auto whitespace-nowrap text-sm text-slate-950">{mi(fixedMi)}</strong>
+                  <strong className="ml-auto whitespace-nowrap text-sm text-slate-950">{mi(fixedMi)} <span className="block text-right text-xs font-normal text-slate-500">{mi(fixedMi / 2)} cada</span></strong>
                 </div>
                 <input
                   id="fixed-price"
@@ -708,17 +736,18 @@ export default function CustoDoFixo() {
 
               <div>
                 <div className="mb-2 flex items-center gap-1">
-                  <label htmlFor="premissas" className="text-sm font-semibold text-slate-700">Premissas</label>
-                  <InfoTip text={selectedVariantHelp} />
+                  <p id="premissas-label" className="text-sm font-semibold text-slate-700">Premissas</p>
+                  <InfoTip items={[{ label: 'Premissas', text: selectedVariantHelp }]} />
                 </div>
-                <select
-                  id="premissas"
-                  value={variantId}
-                  onChange={event => setVariantId(event.currentTarget.value)}
-                  className="min-h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-slate-900 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-100"
-                >
-                  {Object.entries(view.variantes).map(([key, item]: [string, any]) => <option key={key} value={key}>{item.nome}</option>)}
-                </select>
+                <div role="group" aria-labelledby="premissas-label" className="flex flex-wrap gap-2">
+                  {Object.entries(view.variantes).map(([key, item]: [string, any]) => <button
+                    key={key}
+                    type="button"
+                    aria-pressed={variantId === key}
+                    onClick={() => setVariantId(key)}
+                    className={`min-h-9 rounded-full border px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${variantId === key ? 'border-red-600 bg-red-600 font-semibold text-white shadow-sm' : 'border-red-200 bg-red-50 font-medium text-red-700 hover:bg-red-100'}`}
+                  >{item.nome}</button>)}
+                </div>
               </div>
             </div>
           </section>
@@ -727,13 +756,20 @@ export default function CustoDoFixo() {
         <div className="flex min-w-0 flex-col gap-4">
           <section className="space-y-3" aria-label="Resultados estimados">
             <article className="min-w-0 rounded-xl bg-slate-950 p-4 text-white shadow-sm sm:p-5">
-              <p className="text-xs font-bold uppercase tracking-[.18em] text-red-300">Valor do VSR em 30 anos</p>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-xs font-bold uppercase tracking-[.18em] text-red-300">Valor do VSR em 30 anos</p>
+                <InfoTip tone="light" items={[
+                  { label: 'VPL', text: 'P10 é o caso pessimista; P90, o otimista.' },
+                  { label: 'Payback', text: paybackNote },
+                  { label: 'Preço de equilíbrio', text: `${equilibriumDescription} ${contractRangeDescription}` },
+                ]} />
+              </div>
               <p className="mt-2 text-2xl font-black leading-tight sm:text-3xl">VPL: {signedMi(stats.p50 ?? 0)}</p>
               <p className="mt-2 text-xs leading-5 text-slate-300 sm:text-sm">(Pessimista P10: {mi(stats.p10)} | Otimista P90: {mi(stats.p90)})</p>
             </article>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               <article className="min-w-0 rounded-xl bg-white p-3 shadow-sm">
-                <p className="flex items-center gap-1 text-xs font-semibold text-slate-500">Payback <InfoTip text={paybackNote} /></p>
+                <p className="text-xs font-semibold text-slate-500">Payback</p>
                 <strong className="mt-1 block text-base font-black text-slate-950">{months(stats.pay50)}</strong>
                 <span className="mt-1 block text-[11px] leading-4 text-slate-500">P10 {months(stats.pay10)} · P90 {months(stats.pay90)}</span>
                 {isOutsideSimulatedRange && <span className="mt-1 block text-[10px] text-slate-500">fora da faixa simulada</span>}
@@ -744,7 +780,7 @@ export default function CustoDoFixo() {
                 {isOutsideSimulatedRange && <span className="mt-1 block text-[10px] text-slate-500">fora da faixa simulada</span>}
               </article>
               <article className="col-span-2 min-w-0 rounded-xl bg-red-50 p-3 shadow-sm sm:col-span-1">
-                <p className="flex items-center gap-1 text-xs font-semibold text-red-700">Preço de equilíbrio <InfoTip text={`${equilibriumDescription} ${contractRangeDescription}`} /></p>
+                <p className="text-xs font-semibold text-red-700">Preço de equilíbrio</p>
                 <strong className="mt-1 block text-base font-black leading-5 text-slate-950">
                   {equilibrium > gradeMax * 3 ? 'Compensa em qualquer preço da faixa' : <>Compensa até {mi(equilibrium)}</>}
                 </strong>
@@ -754,22 +790,30 @@ export default function CustoDoFixo() {
           </section>
 
           <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5" aria-labelledby="impact-title">
-            <h2 id="impact-title" className="text-lg font-bold">Impacto Operacional e Vida Útil</h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 id="impact-title" className="text-lg font-bold">Impacto Operacional e Vida Útil</h2>
+              <InfoTip items={[
+                { label: 'Payback', text: paybackNote },
+                { label: 'Manobras evitadas', text: 'por ano, por disjuntor do fixo' },
+                { label: 'Troca do disjuntor', text: `fixo troca a cada ~${numberText(scenario.oper.anos_ate_troca_fixo)} anos; o do VSR não troca em 30` },
+                { label: 'Vão de manobra evitado', text: '1 vão a menos (disjuntor, seccionadoras, obra)' },
+              ]} />
+            </div>
             <div className="mt-2 divide-y divide-gray-100">
               <div className="flex items-center justify-between gap-3 py-2">
-                <span className="flex items-center gap-1 text-sm text-slate-700">Payback <InfoTip text={paybackNote} /></span>
+                <span className="text-sm text-slate-700">Payback</span>
                 <strong className="text-right text-sm font-black text-slate-950">{months(stats.pay50)}{isOutsideSimulatedRange && <span className="ml-1 block text-[10px] font-normal text-slate-500">fora da faixa simulada</span>}</strong>
               </div>
               <div className="flex items-center justify-between gap-3 py-2">
-                <span className="flex items-center gap-1 text-sm text-slate-700">Manobras evitadas <InfoTip text="/ ano, por disjuntor do fixo" /></span>
+                <span className="text-sm text-slate-700">Manobras evitadas</span>
                 <strong className="text-right text-sm font-black text-slate-950">{numberText(scenario.oper.manobras_evitadas_ano)} / ano</strong>
               </div>
               <div className="flex items-center justify-between gap-3 py-2">
-                <span className="flex items-center gap-1 text-sm text-slate-700">Troca do disjuntor <InfoTip text={`fixo troca a cada ~${numberText(scenario.oper.anos_ate_troca_fixo)} anos; o do VSR não troca em 30`} /></span>
+                <span className="text-sm text-slate-700">Troca do disjuntor</span>
                 <strong className="text-right text-sm font-black text-slate-950">Adiada</strong>
               </div>
               <div className="flex items-center justify-between gap-3 py-2 last:pb-0">
-                <span className="flex items-center gap-1 text-sm text-slate-700">Vão de manobra evitado <InfoTip text="1 vão a menos (disjuntor, seccionadoras, obra)" /></span>
+                <span className="text-sm text-slate-700">Vão de manobra evitado</span>
                 <strong className="text-right text-sm font-black text-slate-950">{mi(scenario.preco_vao / 1e6)}</strong>
               </div>
             </div>
@@ -794,15 +838,15 @@ export default function CustoDoFixo() {
             </div>
             <div className="mt-4">
               {analysisId === 'risk' && <div id="panel-risk" role="tabpanel" aria-labelledby="panel-risk-tab" className="min-w-0">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex items-center gap-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
                     <h2 id="fan-title" className="text-lg font-bold">A Névoa do Risco</h2>
-                    <InfoTip text={fanDescription} />
+                    <div className="mt-2 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-600">
+                      <span className="flex items-center gap-1.5"><i className="size-2.5 rounded-full bg-red-600" />Reator fixo</span>
+                      <span className="flex items-center gap-1.5"><i className="size-2.5 rounded-full bg-emerald-600" />VSR</span>
+                    </div>
                   </div>
-                  <div className="flex gap-3 text-[11px] font-semibold text-slate-600">
-                    <span className="flex items-center gap-1.5"><i className="size-2.5 rounded-full bg-red-600" />Reator fixo</span>
-                    <span className="flex items-center gap-1.5"><i className="size-2.5 rounded-full bg-emerald-600" />VSR</span>
-                  </div>
+                  <InfoTip text={fanDescription} />
                 </div>
                 <div className="mt-3 min-w-0">
                   <ChartContainer config={{ fixed: { label: 'Reator fixo', color: '#e60000' }, vsr: { label: 'VSR', color: '#059669' } }} className="h-[280px] w-full">
@@ -841,15 +885,15 @@ export default function CustoDoFixo() {
               </div>}
 
               {analysisId === 'price' && <div id="panel-price" role="tabpanel" aria-labelledby="panel-price-tab" className="min-w-0">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex items-center gap-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
                     <h2 id="pp-title" className="text-lg font-bold">Até quanto o VSR compensa</h2>
-                    <InfoTip text="VPL do VSR em função do preço · faixa P10–P90 e mediana" />
+                    <div className="mt-2 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-600">
+                      <span className="flex items-center gap-1.5"><i className="size-2.5 rounded-full bg-emerald-600" />VPL mediano</span>
+                      <span className="flex items-center gap-1.5"><i className="size-2.5 rounded-full bg-emerald-100" />P10–P90</span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-3 text-[11px] font-semibold text-slate-600">
-                    <span className="flex items-center gap-1.5"><i className="size-2.5 rounded-full bg-emerald-600" />VPL mediano</span>
-                    <span className="flex items-center gap-1.5"><i className="size-2.5 rounded-full bg-emerald-100" />P10–P90</span>
-                  </div>
+                  <InfoTip text="VPL do VSR em função do preço · faixa P10–P90 e mediana" />
                 </div>
                 <div className="mt-3 min-w-0">
                   <ChartContainer config={{ median: { label: 'VPL mediano', color: '#059669' }, range: { label: 'P10–P90', color: '#a7f3d0' } }} className="h-[280px] w-full">
@@ -906,14 +950,16 @@ export default function CustoDoFixo() {
               </div>}
 
               {analysisId === 'operation' && <div id="panel-operation" role="tabpanel" aria-labelledby="panel-operation-tab" className="min-w-0">
-                <div className="flex items-center gap-1">
-                  <h2 id="day-title" className="text-lg font-bold">Um dia de operação</h2>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h2 id="day-title" className="text-lg font-bold">Um dia de operação</h2>
+                    <div className="mt-2 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-600">
+                      <span className="flex items-center gap-1.5"><i className="size-2 border-t-2 border-dashed border-slate-400" />Necessidade</span>
+                      <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-red-600" />Reator fixo</span>
+                      <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-emerald-600" />VSR</span>
+                    </div>
+                  </div>
                   <InfoTip text={`Dia típico (${dateBR}): o fixo manobrou ${scenario.dia.manobras_fixo} vezes; o VSR, ${scenario.dia.manobras_vsr}, acompanhando a rede com ${scenario.dia.taps_vsr} trocas de tap.`} />
-                </div>
-                <div className="mt-2 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-600">
-                  <span className="flex items-center gap-1.5"><i className="size-2 border-t-2 border-dashed border-slate-400" />Necessidade</span>
-                  <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-red-600" />Reator fixo</span>
-                  <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-emerald-600" />VSR</span>
                 </div>
                 <div className="mt-2 min-w-0">
                   <ChartContainer config={{ need: { label: 'Necessidade', color: '#94a3b8' }, fixed: { label: 'Reator fixo', color: '#e60000' }, vsr: { label: 'VSR', color: '#059669' } }} className="h-[250px] w-full">
@@ -930,7 +976,7 @@ export default function CustoDoFixo() {
                 </div>
               </div>}
               {analysisId === 'value' && <div id="panel-value" role="tabpanel" aria-labelledby="panel-value-tab" className="min-w-0">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center justify-between gap-2">
                   <h2 id="casc-title" className="text-lg font-bold">De onde vem o valor</h2>
                   <InfoTip text="Valor presente médio de cada parcela · verde a favor do VSR, vermelho contra" />
                 </div>
