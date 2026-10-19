@@ -176,8 +176,8 @@ function FanChart({ data }: { data: { year: string; upper: number; lower: number
 }
 
 function SimulatorPage({ onNavigate }: { onNavigate: (tab: TabId) => void }) {
-  const [scenario, setScenario] = useState<Scenario>('Campo')
-  const [vsrPrice, setVsrPrice] = useState(model.cenarios.campo.precos.base / 1_000_000)
+  const [scenario, setScenario] = useState<Scenario>('Centro Urbano')
+  const [vsrPrice, setVsrPrice] = useState(model.cenarios.urbano.precos.base / 1_000_000)
   const scenarioData = model.cenarios[scenarioIds[scenario]]
   const variant = scenarioData.visoes.concessionaria.variantes.base
   const stats = {
