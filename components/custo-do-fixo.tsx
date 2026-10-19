@@ -688,7 +688,7 @@ export default function CustoDoFixo() {
                 <div className="flex items-center gap-1">
                   <label htmlFor="fixed-price" className="text-sm font-semibold text-slate-700">Preço dos 2 reatores fixos</label>
                   <InfoTip text={fixedPriceMethod} />
-                  <strong className="ml-auto whitespace-nowrap text-sm text-slate-950">{mi(fixedMi)}</strong>
+                  <strong className="ml-auto whitespace-nowrap text-sm text-slate-950">{mi(fixedMi)} <span className="block text-right text-xs font-normal text-slate-500">{mi(fixedMi / 2)} cada</span></strong>
                 </div>
                 <input
                   id="fixed-price"
