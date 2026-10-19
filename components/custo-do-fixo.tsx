@@ -794,7 +794,7 @@ export default function CustoDoFixo() {
               <h2 id="impact-title" className="text-lg font-bold">Impacto Operacional e Vida Útil</h2>
               <InfoTip items={[
                 { label: 'Payback', text: paybackNote },
-                { label: 'Manobras evitadas', text: '/ ano, por disjuntor do fixo' },
+                { label: 'Manobras evitadas', text: 'por ano, por disjuntor do fixo' },
                 { label: 'Troca do disjuntor', text: `fixo troca a cada ~${numberText(scenario.oper.anos_ate_troca_fixo)} anos; o do VSR não troca em 30` },
                 { label: 'Vão de manobra evitado', text: '1 vão a menos (disjuntor, seccionadoras, obra)' },
               ]} />
