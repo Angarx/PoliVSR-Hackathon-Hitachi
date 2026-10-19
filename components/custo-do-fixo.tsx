@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Building2, FileText, Info, UtilityPole, Wind, X } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { ArrowRight, BarChart3, Building2, FileText, UtilityPole, Wind, X } from 'lucide-react'
 import {
   Area,
   AreaChart,
@@ -18,7 +19,9 @@ import {
   YAxis,
 } from 'recharts'
 import { ChartContainer, ChartTooltip } from '@/components/ui/chart'
+import { InfoTip } from '@/components/info-tip'
 import calculatorData from '@/lib/dados/site_calculadora.json'
+import { mi, numberText, percentage } from '@/lib/format'
 
 type ScenarioId = 'urbano' | 'campo' | 'polo_eolico'
 type ViewId = 'concessionaria' | 'sin'
@@ -36,14 +39,8 @@ type FanPoint = {
   vsrP90: number
   vsrRange: [number, number]
 }
-type InfoTipItem = { label: string; text: string }
-
 const model: any = calculatorData
-const formatters = {
-  zero: new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }),
-  one: new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
-  two: new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-}
+const MonteCarloView = dynamic(() => import('@/components/monte-carlo'), { ssr: false })
 
 const scenarioOptions: { id: ScenarioId; icon: typeof Building2 }[] = [
   { id: 'urbano', icon: Building2 },
@@ -92,23 +89,8 @@ const priceLabels = [
   ['estresse_baixo', 'Nível de 2023'],
 ] as const
 
-function numberText(value: number, digits = 0) {
-  return (digits === 0 ? formatters.zero : digits === 1 ? formatters.one : formatters.two).format(value)
-}
-
-function mi(value: NullableNumber | undefined, digits?: number) {
-  if (value === null || value === undefined || !Number.isFinite(value)) return '—'
-  const decimals = digits ?? (Math.abs(value) < 1 ? 2 : 1)
-  const amount = numberText(Math.abs(value), decimals)
-  return `${value < -1e-9 ? '− ' : ''}R$ ${amount} mi`
-}
-
 function signedMi(value: number) {
   return `${value > 1e-9 ? '+ ' : ''}${mi(value)}`
-}
-
-function percentage(value: number) {
-  return `${numberText(Math.round(value * 100))}%`
 }
 
 function signedPercentage(value: number) {
@@ -243,133 +225,14 @@ function PriceButton({ label, price, selected, onSelect }: { label: string; pric
   </button>
 }
 
-function InfoTip({ text, items, tone = 'default' }: { text?: string; items?: InfoTipItem[]; tone?: 'default' | 'light' }) {
-  const id = useId()
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const popoverRef = useRef<HTMLDivElement>(null)
-  const hoverTimer = useRef<number | null>(null)
-  const [pinned, setPinned] = useState(false)
-  const [hovered, setHovered] = useState(false)
-  const [position, setPosition] = useState<{ left: number; top: number; width: number; maxHeight: number | null }>({
-    left: 12,
-    top: 12,
-    width: 300,
-    maxHeight: null,
-  })
-  const content = items ?? (text ? [{ label: '', text }] : [])
-  const open = pinned || hovered
-
-  useEffect(() => {
-    if (!open) return
-    const updatePosition = () => {
-      const button = buttonRef.current
-      if (!button) return
-      const rect = button.getBoundingClientRect()
-      const width = Math.max(0, Math.min(300, window.innerWidth - 24))
-      const centeredLeft = rect.left + rect.width / 2 - width / 2
-      const rightAlignedLeft = rect.right - width
-      const preferredLeft = rect.left + rect.width / 2 > window.innerWidth / 2 ? rightAlignedLeft : centeredLeft
-      const left = Math.max(12, Math.min(preferredLeft, window.innerWidth - width - 12))
-      const height = popoverRef.current?.getBoundingClientRect().height ?? 120
-      const spaceAbove = Math.max(0, rect.top - 20)
-      const spaceBelow = Math.max(0, window.innerHeight - rect.bottom - 20)
-      const placeBelow = height <= spaceBelow || (height > spaceAbove && spaceBelow >= spaceAbove)
-      const maxHeight = Math.max(0, Math.min(window.innerHeight - 24, placeBelow ? spaceBelow : spaceAbove))
-      const visibleHeight = Math.min(height, maxHeight)
-      const preferredTop = placeBelow ? rect.bottom + 8 : rect.top - visibleHeight - 8
-      const top = Math.max(12, Math.min(preferredTop, window.innerHeight - visibleHeight - 12))
-      setPosition({ left, top, width, maxHeight })
-    }
-    const closeOnOutside = (event: PointerEvent) => {
-      const target = event.target
-      if (!(target instanceof Node) || buttonRef.current?.contains(target) || popoverRef.current?.contains(target)) return
-      setPinned(false)
-      setHovered(false)
-    }
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setPinned(false)
-        setHovered(false)
-      }
-    }
-    updatePosition()
-    window.addEventListener('resize', updatePosition)
-    window.addEventListener('scroll', updatePosition, true)
-    document.addEventListener('pointerdown', closeOnOutside)
-    document.addEventListener('keydown', closeOnEscape)
-    return () => {
-      window.removeEventListener('resize', updatePosition)
-      window.removeEventListener('scroll', updatePosition, true)
-      document.removeEventListener('pointerdown', closeOnOutside)
-      document.removeEventListener('keydown', closeOnEscape)
-    }
-  }, [open])
-
-  function scheduleHoverClose() {
-    if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
-    hoverTimer.current = window.setTimeout(() => setHovered(false), 140)
-  }
-
-  function keepHoverOpen() {
-    if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
-    setHovered(true)
-  }
-
-  return <>
-    <button
-      ref={buttonRef}
-      type="button"
-      aria-label="Explicação"
-      aria-expanded={open}
-      aria-describedby={open ? id : undefined}
-      data-infotip-trigger
-      onClick={() => {
-        setPinned(value => !value)
-        setHovered(false)
-      }}
-      onPointerEnter={event => {
-        if (event.pointerType === 'mouse') keepHoverOpen()
-      }}
-      onPointerLeave={event => {
-        if (event.pointerType === 'mouse') scheduleHoverClose()
-      }}
-      className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${tone === 'light' ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
-    >
-      <Info aria-hidden="true" size={18} />
-    </button>
-    {open && typeof document !== 'undefined' && createPortal(
-      <div
-        ref={popoverRef}
-        id={id}
-        role="tooltip"
-        data-infotip-popover
-        onPointerEnter={event => {
-          if (event.pointerType === 'mouse') keepHoverOpen()
-        }}
-        onPointerLeave={event => {
-          if (event.pointerType === 'mouse') scheduleHoverClose()
-        }}
-        style={{ left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight ?? 'calc(100vh - 24px)' }}
-        className="fixed z-[70] max-w-[min(300px,calc(100vw-24px))] max-h-[calc(100vh-24px)] overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 text-sm leading-5 text-slate-600 shadow-lg"
-      >
-        <div className="space-y-2">
-          {content.map((item, index) => <p key={`${item.label}-${index}`}>
-            {item.label && <strong className="font-bold text-slate-800">{item.label}: </strong>}
-            {item.text}
-          </p>)}
-        </div>
-      </div>,
-      document.body,
-    )}
-  </>
-}
-
 export default function CustoDoFixo() {
   const [scenarioId, setScenarioId] = useState<ScenarioId>('urbano')
   const [viewId, setViewId] = useState<ViewId>('concessionaria')
   const [variantId, setVariantId] = useState('base')
   const [price, setPrice] = useState(() => roundedPrice(model.cenarios.urbano, model.cenarios.urbano.precos.base))
   const [fixedFactor, setFixedFactor] = useState(1)
+  const [monteCarloOpen, setMonteCarloOpen] = useState(false)
+  const returnToMonteCarloLink = useRef(false)
   const [analysisId, setAnalysisId] = useState<AnalysisId>('risk')
   const [showFanTable, setShowFanTable] = useState(false)
   const [showPriceTable, setShowPriceTable] = useState(false)
@@ -377,6 +240,15 @@ export default function CustoDoFixo() {
   const methodButtonRef = useRef<HTMLButtonElement>(null)
   const methodCloseRef = useRef<HTMLButtonElement>(null)
   const methodDialogRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (monteCarloOpen) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior })
+    } else if (returnToMonteCarloLink.current) {
+      returnToMonteCarloLink.current = false
+      document.getElementById('monte-carlo-link')?.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior })
+    }
+  }, [monteCarloOpen])
 
   useEffect(() => {
     if (!methodOpen) return
@@ -604,6 +476,11 @@ export default function CustoDoFixo() {
     if (nextPrice !== undefined) setPrice(nextPrice)
   }
 
+  function returnToCalculator() {
+    returnToMonteCarloLink.current = true
+    setMonteCarloOpen(false)
+  }
+
   const cascadeRows = variant.cascata
     .map((row: any) => {
       let value: number
@@ -637,14 +514,12 @@ export default function CustoDoFixo() {
     { id: 'value', label: 'Valor' },
   ]
 
-  return <section className="min-h-screen overflow-x-clip bg-slate-50 px-4 pb-16 pt-28 text-slate-950 sm:px-8">
+  return <>
+    <section hidden={monteCarloOpen} className="min-h-screen overflow-x-clip bg-slate-50 px-4 pb-16 pt-28 text-slate-950 sm:px-8">
     <div className="mx-auto max-w-7xl">
-      <header className="mb-8 max-w-3xl">
-        <p className="text-center text-xs font-bold uppercase tracking-[.25em] text-red-600">Simulação financeira</p>
-        <div className="mt-3 flex items-start justify-between gap-3">
-          <h1 className="min-w-0 flex-1 text-3xl font-black tracking-tight sm:text-5xl">O Custo do Fixo: Simulador Estocástico do VSR</h1>
-          <InfoTip text={`Modelo PoliVSR · ${numberText(model.meta.simulacoes)} simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · ${model.meta.moeda}`} />
-        </div>
+      <header className="mx-auto mb-8 max-w-6xl text-center">
+        <p className="text-xs font-bold uppercase tracking-[.25em] text-red-600">Simulação financeira</p>
+        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">O Custo do Fixo: Simulador Estatístico do <span className="whitespace-nowrap">VSR<InfoTip text={`Modelo PoliVSR · ${numberText(model.meta.simulacoes)} simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · ${model.meta.moeda}`} /></span></h1>
       </header>
 
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(280px,.82fr)_minmax(0,1.18fr)]">
@@ -788,6 +663,17 @@ export default function CustoDoFixo() {
               </article>
             </div>
           </section>
+
+          <button
+            id="monte-carlo-link"
+            type="button"
+            onClick={() => setMonteCarloOpen(true)}
+            className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl bg-red-600 px-4 py-3 font-bold text-white transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+          >
+            <BarChart3 aria-hidden="true" size={20} />
+            <span>Ver as simulações de Monte Carlo</span>
+            <ArrowRight aria-hidden="true" size={20} />
+          </button>
 
           <section className="rounded-xl bg-white p-4 shadow-sm sm:p-5" aria-labelledby="impact-title">
             <div className="flex items-center justify-between gap-2">
@@ -1045,5 +931,7 @@ export default function CustoDoFixo() {
       </div>,
       document.body,
     )}
-  </section>
+    </section>
+    {monteCarloOpen && <MonteCarloView initialScenarioId={scenarioId} initialViewId={viewId} onBack={returnToCalculator} />}
+  </>
 }
