@@ -307,7 +307,7 @@ function ContactSection() {
           <input className="rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="E-mail corporativo" name="email" aria-label="E-mail corporativo" type="email" required />
           <textarea className="h-32 rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="Como as sobretensões afetam o OPEX da sua operação hoje?" name="mensagem" aria-label="Como as sobretensões afetam o OPEX da sua operação hoje?" required />
           <button type="submit" className="rounded bg-red-600 p-4 text-center font-bold hover:bg-red-700">Solicitar Estudo de Viabilidade</button>
-          <p role="status" aria-live="polite" className="flex items-center gap-2 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm font-semibold text-emerald-300">
+          <p role="status" aria-live="polite" className={sent ? 'flex items-center gap-2 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm font-semibold text-emerald-300' : 'sr-only'}>
             {sent && <><CheckCircle2 aria-hidden="true" size={18} /><span>Envio confirmado. Obrigado pelo contato!</span></>}
           </p>
         </form>
