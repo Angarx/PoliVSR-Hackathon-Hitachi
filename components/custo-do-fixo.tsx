@@ -671,7 +671,7 @@ export default function CustoDoFixo() {
             className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl bg-red-600 px-4 py-3 font-bold text-white transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
           >
             <BarChart3 aria-hidden="true" size={20} />
-            <span>Ver as simulações de Monte Carlo</span>
+            <span>Simulações de Monte Carlo</span>
             <ArrowRight aria-hidden="true" size={20} />
           </button>
 

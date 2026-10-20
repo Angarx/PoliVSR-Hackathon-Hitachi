@@ -33,6 +33,27 @@ function signedMi(value: number | null | undefined) {
   return `${value > 0 ? '+ ' : ''}${mi(value, 2)}`
 }
 
+function niceTicks(min: number, max: number, target = 5) {
+  const lower = Math.min(min, max)
+  const upper = Math.max(min, max)
+  const rawStep = (upper - lower) / Math.max(1, target)
+  if (!Number.isFinite(rawStep) || rawStep <= 0) return [lower]
+
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep))
+  const normalized = rawStep / magnitude
+  const multiplier = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10
+  const step = multiplier * magnitude
+  const precision = Math.max(0, Math.min(12, Math.ceil(-Math.log10(step))))
+  const tolerance = step * 1e-10
+  const ticks: number[] = []
+
+  for (let value = Math.ceil(lower / step - 1e-10) * step; value <= upper + tolerance; value += step) {
+    ticks.push(Number(value.toFixed(precision)))
+  }
+  if (lower <= 0 && upper >= 0) ticks.push(0)
+  return [...new Set(ticks)].sort((a, b) => a - b)
+}
+
 function Panel({ title, figure, info, children }: {
   title: string
   figure?: string
@@ -126,6 +147,16 @@ export default function MonteCarlo({
   const tornadoRange = tornadoMax - tornadoMin || 1
   const tornadoPosition = (value: number) => `${((value - tornadoMin) / tornadoRange) * 100}%`
   const binMax = Math.max(...bins.map((row: any) => row.n))
+  const histogramMin = Math.min(...bins.map((row: any) => row.center))
+  const histogramMax = Math.max(...bins.map((row: any) => row.center))
+  const calculatorVariants = scenario.visoes.concessionaria.variantes
+  const variantLabel = (name: string) => {
+    if (name === 'base') return calculatorVariants.base?.nome ?? 'Premissa base'
+    const normalized = (value: string) => value.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
+    const comparable = name.replace(/^regime:\s*/i, '')
+    const match = Object.values(calculatorVariants).find((item: any) => normalized(item.nome) === normalized(comparable)) as any
+    return match?.nome ?? `${name.charAt(0).toLocaleUpperCase('pt-BR')}${name.slice(1)}`
+  }
   const basePrice = scenario.precos.base / 1e6
 
   function backButton() {
@@ -202,17 +233,27 @@ export default function MonteCarlo({
         <ChartContainer config={{ count: { label: 'Simulações', color: '#334155' } }} className="h-[280px] w-full">
           <BarChart data={bins} margin={{ top: 24, right: 12, bottom: 8, left: 0 }}>
             <CartesianGrid vertical={false} stroke="#e2e8f0" />
-            <XAxis dataKey="center" type="number" domain={['dataMin', 'dataMax']} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} tickMargin={8} />
+            <XAxis dataKey="center" type="number" domain={['dataMin', 'dataMax']} ticks={niceTicks(histogramMin, histogramMax)} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} tickMargin={8} />
             <YAxis type="number" scale="log" domain={[1, 'auto']} allowDataOverflow width={42} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} />
             <ChartTooltip content={<HistogramTooltip />} />
-            {base.vpl_p10 !== null && <ReferenceLine x={base.vpl_p10} stroke="#e60000" strokeDasharray="4 4" label={{ value: 'P10', position: 'insideTopLeft', fill: '#e60000', fontSize: 10 }} />}
-            {base.vpl_p50 !== null && <ReferenceLine x={base.vpl_p50} stroke="#059669" strokeDasharray="4 4" label={{ value: 'P50', position: 'insideTopLeft', fill: '#059669', fontSize: 10 }} />}
-            {base.vpl_p90 !== null && <ReferenceLine x={base.vpl_p90} stroke="#334155" strokeDasharray="4 4" label={{ value: 'P90', position: 'insideTopLeft', fill: '#334155', fontSize: 10 }} />}
+            {base.vpl_p10 !== null && <ReferenceLine x={base.vpl_p10} stroke="#e60000" strokeDasharray="4 4" />}
+            {base.vpl_p50 !== null && <ReferenceLine x={base.vpl_p50} stroke="#059669" strokeDasharray="4 4" />}
+            {base.vpl_p90 !== null && <ReferenceLine x={base.vpl_p90} stroke="#334155" strokeDasharray="4 4" />}
             <Bar dataKey="n" isAnimationActive={false} radius={[2, 2, 0, 0]}>
               {bins.map((row: any, index: number) => <Cell key={`bin-${index}`} fill={row.de < 0 ? '#e60000' : '#334155'} />)}
             </Bar>
           </BarChart>
         </ChartContainer>
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium tabular-nums text-slate-700">
+          {[
+            ['P10', base.vpl_p10, '#e60000'],
+            ['P50', base.vpl_p50, '#059669'],
+            ['P90', base.vpl_p90, '#334155'],
+          ].map(([label, value, color]: any) => <span key={label} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+            <span aria-hidden="true" className="w-4 border-t-2 border-dashed" style={{ borderColor: color }} />
+            {label} {mi(value, 2)}
+          </span>)}
+        </div>
         <p className="mt-3 rounded-lg bg-slate-50 px-3 py-3 text-sm font-semibold leading-5 text-slate-800">
           {negativeCount === null ? '—' : numberText(negativeCount)} de 4.000 simulações com VPL negativo ({base.p_vpl_pos === null ? '—' : percentage(1 - base.p_vpl_pos, 1)})
         </p>
@@ -231,8 +272,8 @@ export default function MonteCarlo({
             <CartesianGrid vertical={false} stroke="#e2e8f0" />
             <ReferenceArea x1={scenario.precos.baixo / 1e6} x2={scenario.precos.alto / 1e6} y1={priceDomain[0]} y2={priceDomain[1]} fill="#059669" fillOpacity={0.08} stroke="none" />
             <ReferenceArea x1={scenario.precos.estresse_baixo / 1e6} x2={scenario.precos.estresse_alto / 1e6} y1={priceDomain[0]} y2={priceDomain[1]} fill="#e60000" fillOpacity={0.07} stroke="none" />
-            <XAxis dataKey="price" type="number" domain={[gradeMin, gradeMax]} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} tickMargin={8} />
-            <YAxis domain={priceDomain} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} width={42} />
+            <XAxis dataKey="price" type="number" domain={[gradeMin, gradeMax]} ticks={niceTicks(gradeMin, gradeMax)} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} tickMargin={8} />
+            <YAxis domain={priceDomain} ticks={niceTicks(priceDomain[0], priceDomain[1])} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} width={42} />
             <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1} />
             <ChartTooltip content={<PriceTooltip />} />
             <Area dataKey="range" type="monotone" stroke="none" fill="#a7f3d0" fillOpacity={0.6} isAnimationActive={false} />
@@ -287,16 +328,24 @@ export default function MonteCarlo({
         info={<InfoTip text="VPL mediano e chance de VPL positivo para cada premissa alternativa, no preço-base do VSR (Tabela 15 do PDF)." />}
       >
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Metric label="VPL P10 · P50 · P90">
-            {mi(base.vpl_p10, 2)} · {mi(base.vpl_p50, 2)} · {mi(base.vpl_p90, 2)}
+          <Metric label="VPL">
+            <div className="space-y-0.5">
+              <p>P10 {mi(base.vpl_p10, 2)}</p>
+              <p>P50 {mi(base.vpl_p50, 2)}</p>
+              <p>P90 {mi(base.vpl_p90, 2)}</p>
+            </div>
           </Metric>
           <Metric label="VPL médio">{mi(base.vpl_media, 2)}</Metric>
           <Metric label="Chance de compensar">{percentage(base.p_vpl_pos, 1)}</Metric>
           <Metric label="Payback imediato">{percentage(base.pct_payback_imediato, 1)}</Metric>
           <Metric label="Sem payback em 30 anos">{percentage(base.pct_sem_payback, 1)}</Metric>
           <Metric label="Preço do VSR">{mi(base.preco_vsr, 2)}</Metric>
-          <Metric label="Preço de equilíbrio P10 · P50 · P90">
-            {mi(base.eq_p10, 2)} · {mi(base.eq_p50, 2)} · {mi(base.eq_p90, 2)}
+          <Metric label="Preço de equilíbrio">
+            <div className="space-y-0.5">
+              <p>P10 {mi(base.eq_p10, 2)}</p>
+              <p>P50 {mi(base.eq_p50, 2)}</p>
+              <p>P90 {mi(base.eq_p90, 2)}</p>
+            </div>
           </Metric>
         </div>
 
@@ -308,7 +357,7 @@ export default function MonteCarlo({
             </div>
             <ul className="divide-y divide-gray-100">
               {variants.map((row: any) => <li key={row.variante} className={`grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-3 py-2 text-xs sm:text-sm ${row.variante === 'base' ? 'rounded-md bg-red-50' : ''}`}>
-                <span className="min-w-0 break-words font-medium text-slate-700">{row.variante}</span>
+                <span className="min-w-0 break-words font-medium text-slate-700">{variantLabel(row.variante)}</span>
                 <span className={`whitespace-nowrap text-right font-bold tabular-nums ${row.vpl_p50 !== null && row.vpl_p50 < 0 ? 'text-red-600' : 'text-slate-950'}`}>{mi(row.vpl_p50, 2)}</span>
                 <span className="whitespace-nowrap text-right tabular-nums text-slate-700">{percentage(row.p_vpl_pos, 1)}</span>
               </li>)}
