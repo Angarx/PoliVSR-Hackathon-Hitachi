@@ -273,7 +273,7 @@ export default function MonteCarlo({
             <ReferenceArea x1={scenario.precos.baixo / 1e6} x2={scenario.precos.alto / 1e6} y1={priceDomain[0]} y2={priceDomain[1]} fill="#059669" fillOpacity={0.08} stroke="none" />
             <ReferenceArea x1={scenario.precos.estresse_baixo / 1e6} x2={scenario.precos.estresse_alto / 1e6} y1={priceDomain[0]} y2={priceDomain[1]} fill="#e60000" fillOpacity={0.07} stroke="none" />
             <XAxis dataKey="price" type="number" domain={[gradeMin, gradeMax]} ticks={niceTicks(gradeMin, gradeMax)} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} tickMargin={8} />
-            <YAxis domain={priceDomain} ticks={niceTicks(priceDomain[0], priceDomain[1])} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} width={42} />
+            <YAxis domain={priceDomain} ticks={niceTicks(priceDomain[0], priceDomain[1], 8)} tickFormatter={value => numberText(value)} tickLine={false} axisLine={false} width={42} />
             <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1} />
             <ChartTooltip content={<PriceTooltip />} />
             <Area dataKey="range" type="monotone" stroke="none" fill="#a7f3d0" fillOpacity={0.6} isAnimationActive={false} />
