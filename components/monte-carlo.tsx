@@ -378,7 +378,7 @@ export default function MonteCarlo({
           </div>
           {[
             ['Manobras por ano', numberText(operations.ops_fixo_ano), numberText(operations.ops_vsr_ano)],
-            ['Anos até a revisão geral', `${numberText(operations.anos_ate_revisao_fixo, 1)} anos`, `${numberText(operations.anos_ate_revisao_vsr, 1)} anos`],
+            ['Anos até a revisão geral', operations.anos_ate_revisao_fixo >= 20 ? 'mais de 20 anos' : `${numberText(operations.anos_ate_revisao_fixo, 1)} anos`, operations.anos_ate_revisao_vsr >= 20 ? 'mais de 20 anos' : `${numberText(operations.anos_ate_revisao_vsr, 1)} anos`],
             ['Anos até a troca do disjuntor', operations.anos_ate_troca_fixo >= 30 ? 'não troca em 30 anos' : `${numberText(operations.anos_ate_troca_fixo, 1)} anos`, operations.anos_ate_troca_vsr >= 30 ? 'não troca em 30 anos' : `${numberText(operations.anos_ate_troca_vsr, 1)} anos`],
             ['Falhas maiores do disjuntor em 30 anos', numberText(operations.falhas_maiores_disj_fixo_30a, 2), numberText(operations.falhas_maiores_disj_vsr_30a, 2)],
             ['Operações de tap por ano', '—', numberText(operations.taps_vsr_ano)],

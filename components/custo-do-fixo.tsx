@@ -291,6 +291,9 @@ export default function CustoDoFixo() {
   const variant = view.variantes[variantId] || view.variantes.base
   const referenceFixedMi = scenario.preco_fixos / 1e6
   const fixedMi = referenceFixedMi * fixedFactor
+  const fixedBreakerSwap = scenario.oper.anos_ate_troca_fixo >= 30
+    ? 'não troca em 30 anos'
+    : `troca a cada ~${numberText(scenario.oper.anos_ate_troca_fixo)} anos`
   const premium = price / fixedMi - 1
   const priceStep = stepFor(scenario)
   const selectedViewHelp = viewHelp[viewId]
@@ -685,7 +688,7 @@ export default function CustoDoFixo() {
               <InfoTip items={[
                 { label: 'Payback', text: paybackNote },
                 { label: 'Manobras evitadas', text: 'por ano, por disjuntor do fixo' },
-                { label: 'Troca do disjuntor', text: `fixo troca a cada ~${numberText(scenario.oper.anos_ate_troca_fixo)} anos; o do VSR não troca em 30` },
+                { label: 'Troca do disjuntor', text: `fixo ${fixedBreakerSwap}; o do VSR não troca em 30` },
                 { label: 'Vão de manobra evitado', text: '1 vão a menos (disjuntor, seccionadoras, obra)' },
               ]} />
             </div>
