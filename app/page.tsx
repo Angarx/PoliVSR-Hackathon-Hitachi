@@ -16,7 +16,7 @@ const tabs = [
   { id: 'simulator' as const, label: 'O Preço do Fixo', icon: CircleDollarSign },
 ]
 
-const SimulatorPage = dynamic(() => import('@/components/custo-do-fixo'), { ssr: false })
+const SimulatorPage = dynamic(() => import('@/components/calculadora-embed'), { ssr: false })
 
 const curvePoints = [...VERAO, VERAO[0]]
 const Lmax = Math.max(...curvePoints)

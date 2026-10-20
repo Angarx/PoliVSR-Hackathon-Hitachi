@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monte Carlo PoliVSR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Como a calculadora O Custo do Fixo sorteia as incertezas: 4.000 futuros de 30 anos por cenário, com os parâmetros sorteados, as faixas e as fontes.">
+<script>try{if(/[?&]embed=1(&|$)/.test(location.search))document.documentElement.classList.add('embed')}catch(e){}</script>
+<style>
+/* Mesmo visual da calculadora O Custo do Fixo: cabeçalho branco, página slate-50, vermelho = reator fixo, verde = VSR.
+   Tema claro único, como o site PoliVSR. Leitura de cima para baixo: como funciona → o que sai → o que varia → o que não varia. */
+:root {
+  color-scheme: light;
+  --ink: #020618; --ink-2: #314158; --text-2: #45556c; --muted: #62748e; --faint: #90a1b9;
+  --line: #e2e8f0; --line-2: #f1f5f9; --page: #f8fafc; --surface: #ffffff;
+  --red: #e7000b; --red-hover: #c10007; --brand: #e60000; --red-50: #fef2f2; --red-900: #82181a;
+  --green: #009966; --green-800: #005f46; --green-50: #ecfdf5; --green-100: #d0fae5;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* cabeçalho */
+.site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.site-header .bar { max-width: 80rem; margin: 0 auto; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+.logo { display: flex; align-items: center; gap: 6px; color: var(--ink); text-decoration: none; }
+.logo svg { width: 28px; height: 28px; transform: skewX(-15deg); }
+.logo span { font-size: 1.35rem; font-weight: 800; letter-spacing: -.06em; }
+.logo b { color: var(--brand); font-weight: 800; }
+.back { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 10px 18px; background: var(--red); color: #fff; font-size: 14px; font-weight: 700;
+  text-decoration: none; box-shadow: 0 0 12px 3px rgba(230,0,0,.3); white-space: nowrap; }
+.back:hover { background: var(--red-hover); }
+.back svg { width: 18px; height: 18px; }
+
+/* página */
+main { padding-top: calc(104px + env(safe-area-inset-top, 0px)); padding-bottom: 64px; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+.wrap { max-width: 64rem; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+.eyebrow { font-size: 12px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: .25em; color: var(--red); }
+.head h1 { margin-top: 12px; font-size: 2.25rem; line-height: 1.1; font-weight: 900; letter-spacing: -0.025em; }
+@media (min-width: 640px) { .head h1 { font-size: 3.25rem; line-height: 1.05; } }
+.head .sub { margin-top: 14px; max-width: 44rem; font-size: 17px; line-height: 27px; color: var(--text-2); }
+.h2 { font-size: 22px; line-height: 30px; font-weight: 800; letter-spacing: -0.01em; }
+.lede { margin-top: 6px; max-width: 46rem; font-size: 15px; line-height: 24px; color: var(--text-2); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 1px 2px rgba(2,6,24,.05); padding: 20px; min-width: 0; }
+@media (min-width: 640px) { .card { padding: 24px; } }
+
+/* passos (é de fato uma sequência) */
+.steps { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.step { padding: 18px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.step .n { width: 28px; height: 28px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800;
+  background: var(--ink); color: #fff; }
+.step.rep .n { background: var(--red); }
+.step h3 { margin-top: 10px; font-size: 16px; line-height: 22px; font-weight: 800; }
+.step p { margin-top: 6px; font-size: 14px; line-height: 21px; color: var(--text-2); }
+
+/* seletor de cenário */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--line-2); border-radius: 12px; }
+.seg button { padding: 9px 16px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(2,6,24,.14); }
+.scen-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.scen-note { font-size: 13px; color: var(--muted); }
+.sel { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* gráficos */
+.chart-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
+.chart-head h3 { font-size: 18px; line-height: 26px; font-weight: 700; }
+.chart-head .muted { margin-top: 2px; font-size: 14px; color: var(--muted); }
+.plot { position: relative; margin-top: 16px; width: 100%; overflow-x: clip; }
+.plot svg { display: block; width: 100%; overflow: visible; }
+.plot svg text { font-family: var(--font); font-size: 11px; fill: var(--muted); }
+.plot svg text.lab { font-size: 12px; font-weight: 700; fill: var(--ink-2); }
+.plot svg text.lab-red { font-size: 12px; font-weight: 700; fill: var(--red-hover); }
+.read { margin-top: 14px; font-size: 14px; line-height: 22px; color: var(--text-2); max-width: 46rem; }
+.stats { margin-top: 16px; display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 640px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stat { padding: 12px 14px; border-radius: 10px; background: var(--page); min-width: 0; }
+.stat p { font-size: 12px; font-weight: 600; color: var(--muted); }
+.stat strong { display: block; margin-top: 2px; font-size: 20px; line-height: 28px; font-weight: 800; color: var(--ink); }
+.stat strong.g { color: var(--green-800); }
+.stat strong.r { color: var(--red-hover); }
+.charts { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); }
+
+/* parâmetros sorteados */
+.groups { display: flex; flex-direction: column; gap: 28px; }
+.grp h3 { font-size: 15px; line-height: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); }
+.grp .gnote { margin-top: 2px; font-size: 13px; color: var(--muted); }
+.plist { margin-top: 10px; border-top: 1px solid var(--line); }
+.prow { display: grid; grid-template-columns: minmax(0, 1fr) 128px minmax(0, 12.5rem); gap: 6px 20px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line-2); }
+.prow .nm { font-size: 15px; line-height: 21px; font-weight: 600; color: var(--ink); }
+.prow .mt { margin-top: 2px; font-size: 12px; line-height: 17px; color: var(--muted); }
+.prow svg { display: block; width: 128px; height: 30px; }
+.prow .rg { font-size: 14px; line-height: 20px; color: var(--ink-2); text-align: right; }
+.prow .rg small { display: block; font-size: 12px; color: var(--muted); }
+@media (max-width: 640px) {
+  .prow { grid-template-columns: 112px minmax(0, 1fr); }
+  .prow .who { grid-column: 1 / -1; }
+  .prow svg { width: 112px; }
+  .prow .rg { text-align: left; }
+}
+.kinds { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--text-2); }
+.kinds span { display: inline-flex; align-items: center; gap: 8px; }
+.kinds svg { width: 48px; height: 18px; }
+
+/* eventos e o que não é sorteado */
+.evlist { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .evlist { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ev { padding: 14px 16px; border-left: 3px solid var(--line); background: var(--surface); border-radius: 0 10px 10px 0; min-width: 0; }
+.ev h4 { margin: 0; font-size: 15px; line-height: 21px; font-weight: 700; }
+.ev p { margin-top: 4px; font-size: 14px; line-height: 21px; color: var(--text-2); }
+.fixed { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .fixed { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fixed { margin-top: 10px; }
+.fixed h4 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 700; color: var(--ink-2); }
+.fixed ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; line-height: 22px; color: var(--text-2); }
+.fixed li + li { margin-top: 4px; }
+details.tech { font-size: 14px; line-height: 22px; color: var(--text-2); }
+details.tech summary { cursor: pointer; font-weight: 700; color: var(--ink); }
+details.tech > ul { margin: 12px 0 0; padding-left: 18px; }
+details.tech h3 { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line-2); font-size: 16px; line-height: 22px; font-weight: 800; color: var(--ink); }
+.foot { display: flex; justify-content: center; }
+.foot a { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border: 1px solid #cad5e2; border-radius: 8px; font-size: 14px; font-weight: 700; text-decoration: none; color: var(--ink); background: var(--surface); }
+.foot a:hover { background: var(--page); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* modo embutido no site (?embed=1) */
+html.embed .site-header { display: none; }
+html.embed main { padding-top: 32px; }
+.embed-back { display: none; }
+html.embed .embed-back { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--ink); text-decoration: none; }
+html.embed .embed-back:hover { text-decoration: underline; }
+.embed-back svg { width: 16px; height: 16px; }
+</style>
+
+<header class="site-header">
+  <div class="bar">
+    <a class="logo" href="o-custo-do-fixo.html" aria-label="PoliVSR, voltar para a calculadora">
+      <svg viewBox="0 0 28 28" role="img" aria-label="Marca PoliVSR"><ellipse cx="7" cy="14" rx="3.2" ry="10" fill="none" stroke="currentColor" stroke-width="3"/><ellipse cx="14" cy="14" rx="3.2" ry="10" fill="none" stroke="currentColor" stroke-width="3"/><ellipse cx="21" cy="14" rx="3.2" ry="10" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+      <span>Poli<b>VSR</b></span>
+    </a>
+    <a class="back" href="o-custo-do-fixo.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Calculadora</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <a class="embed-back" href="o-custo-do-fixo.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Voltar para a calculadora</a>
+    <header class="head">
+      <p class="eyebrow">Simulação de Monte Carlo</p>
+      <h1>4.000 futuros possíveis para cada cenário</h1>
+      <p class="sub">Ninguém sabe quando um disjuntor vai falhar ou quanto vai custar o reparo. Por isso a calculadora não faz uma conta só: ela sorteia as incertezas dentro de faixas tiradas da literatura técnica, simula 30 anos mês a mês e repete isso 4.000 vezes.</p>
+    </header>
+
+    <section aria-labelledby="como-title">
+      <h2 id="como-title" class="h2">Como cada simulação funciona</h2>
+      <div class="steps" style="margin-top:16px">
+        <article class="step"><span class="n">1</span><h3>Sorteia as incertezas</h3><p>Escolhe um valor para cada um dos <span id="n-par">19</span> parâmetros da lista abaixo, dentro da faixa de cada um.</p></article>
+        <article class="step"><span class="n">2</span><h3>Simula 360 meses</h3><p>Mês a mês, sorteia falhas, reparos e paradas, e soma manutenções, trocas de disjuntor e multas da ANEEL.</p></article>
+        <article class="step"><span class="n">3</span><h3>Compara as duas opções</h3><p>Calcula o custo dos reatores fixos e o do VSR, em valor presente, e guarda a diferença: o VPL.</p></article>
+        <article class="step rep"><span class="n">×</span><h3>Repete 4.000 vezes</h3><p>Cada repetição é um futuro diferente. O resultado da calculadora é o retrato desses 4.000 futuros.</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="res-title" class="charts">
+      <div class="scen-row">
+        <h2 id="res-title" class="h2">O que sai das simulações</h2>
+        <div class="sel">
+          <div class="seg" role="group" aria-label="Quem avalia" id="seg-vis"></div>
+          <div class="seg" role="group" aria-label="Cenário" id="seg"></div>
+        </div>
+      </div>
+      <p class="lede" id="scen-note"></p>
+
+      <article class="card">
+        <div class="chart-head">
+          <div><h3>Os 4.000 resultados</h3><p class="muted" id="hi-sub"></p></div>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="plot" id="hi-plot" style="height:260px"></div>
+        <p class="read" id="hi-read"></p>
+      </article>
+    </section>
+
+    <section aria-labelledby="ev-title">
+      <h2 id="ev-title" class="h2">O que é sorteado mês a mês</h2>
+      <p class="lede">Dentro de cada simulação, o modelo sorteia em cada mês se acontece cada evento e quanto ele dura, usando os parâmetros sorteados para aquela simulação (lista abaixo).</p>
+      <div class="evlist" id="evlist" style="margin-top:16px"></div>
+    </section>
+
+    <section aria-labelledby="par-title">
+      <h2 id="par-title" class="h2">O que muda de uma simulação para outra</h2>
+      <p class="lede">Cada parâmetro é sorteado uma vez por simulação e vale para os 30 anos dela. A figurinha mostra o formato do sorteio dentro da faixa.</p>
+      <div class="kinds" style="margin-top:12px">
+        <span><svg viewBox="0 0 48 18" aria-hidden="true"><polygon points="2,16 16,3 46,16" fill="#d0fae5" stroke="#009966" stroke-width="1.5"/></svg>Triangular: valores perto do mais provável saem mais</span>
+        <span><svg viewBox="0 0 48 18" aria-hidden="true"><rect x="2" y="5" width="44" height="11" fill="#d0fae5" stroke="#009966" stroke-width="1.5"/></svg>Uniforme: qualquer valor da faixa, com a mesma chance</span>
+      </div>
+      <div class="groups" id="groups" style="margin-top:24px"></div>
+    </section>
+
+    <details class="tech card">
+      <summary>Detalhes técnicos</summary>
+      <ul id="tech"></ul>
+      <h3>O que não é sorteado</h3>
+      <div class="fixed">
+        <div>
+          <h4>Você escolhe na calculadora</h4>
+          <ul>
+            <li>Preço do VSR e preço do reator fixo</li>
+            <li>Quem avalia: transmissora (12,11% ao ano) ou sistema (8,5% ao ano)</li>
+            <li>Premissas: regime de reforço, reserva do VSR, fase reserva do fixo, comutador a óleo</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Fica fixo no modelo</h4>
+          <ul>
+            <li>Tamanho dos reatores e preço do vão e do disjuntor</li>
+            <li>Manobras por dia do modelo físico (só multiplicadas pelo erro sorteado)</li>
+            <li>Receita da função de transmissão e regras da multa da ANEEL (Parcela Variável)</li>
+            <li>Horizonte de 30 anos, sem valor residual</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <nav class="foot" aria-label="Voltar"><a href="o-custo-do-fixo.html">Voltar para a calculadora</a></nav>
+  </div>
+</main>
+
+<script type="application/json" id="dados">{"meta":{"gerado_em":"2026-10-19","simulacoes":4000,"semente":11,"meses":360,"moeda":"R$ de set/2026","visoes":{"concessionaria":"Transmissora (12,11% a.a.)","sin":"Sistema (SIN) (8,5% a.a.)"},"passo_hist":0.1,"precos":"VSR: média dos contratos de 2025–26; fixo: referência EPE/ANEEL de 2021 corrigida pelo IPCA"},"parametros":[{"grupo":"Disjuntores","nome":"Falhas graves de disjuntor que quase não manobra","tipo":"triangular","min":0.23,"moda":0.25,"max":0.28,"unidade":"% ao ano","onde":"fixo e VSR","fonte":"CIGRÉ TB 510"},{"grupo":"Disjuntores","nome":"Falhas graves de disjuntor que manobra reator uma vez por dia","tipo":"triangular","min":1.98,"moda":2.46,"max":3.02,"unidade":"% ao ano","onde":"fixo e VSR","fonte":"CIGRÉ TB 510"},{"grupo":"Disjuntores","nome":"Falhas pequenas para cada falha grave","tipo":"uniforme","min":7.1,"moda":null,"max":7.9,"unidade":"falhas","onde":"fixo e VSR","fonte":"CIGRÉ TB 510 (derivado)"},{"grupo":"Disjuntores","nome":"Chance de a falha grave ser uma explosão","tipo":"uniforme","min":2,"moda":null,"max":8,"unidade":"%","onde":"fixo e VSR","fonte":"premissa"},{"grupo":"Disjuntores","nome":"Chance de o reparo ir para a fábrica","tipo":"uniforme","min":5,"moda":null,"max":15,"unidade":"%","onde":"fixo e VSR","fonte":"manual GE GL314; premissa"},{"grupo":"Disjuntores","nome":"Custo do reparo de uma falha grave","tipo":"triangular","min":5,"moda":15,"max":30,"unidade":"% do disjuntor","onde":"fixo e VSR","fonte":"premissa"},{"grupo":"Disjuntores","nome":"Custo de uma falha pequena","tipo":"triangular","min":0.5,"moda":1,"max":2,"unidade":"% do disjuntor","onde":"fixo e VSR","fonte":"premissa"},{"grupo":"Disjuntores","nome":"Custo da manutenção preventiva (a cada 6 anos)","tipo":"triangular","min":1,"moda":2,"max":3,"unidade":"% do disjuntor","onde":"fixo e VSR","fonte":"Jeromin et al. 2009; premissa"},{"grupo":"Disjuntores","nome":"Manobras até a revisão geral (ou 20 anos)","tipo":"triangular","min":2000,"moda":3000,"max":5000,"unidade":"manobras","onde":"fixo e VSR","fonte":"manual GE GL314; Hermosillo 2002"},{"grupo":"Disjuntores","nome":"Custo da revisão geral","tipo":"triangular","min":7,"moda":10,"max":13,"unidade":"% do disjuntor","onde":"fixo e VSR","fonte":"Jeromin et al. 2009"},{"grupo":"Disjuntores","nome":"Vida mecânica real até a troca do disjuntor","tipo":"uniforme","min":2000,"moda":null,"max":10000,"unidade":"manobras","onde":"fixo e VSR","fonte":"IEC 62271-100; IEEE PES 2017"},{"grupo":"Disjuntores","nome":"Erro no número de manobras do modelo físico","tipo":"triangular","min":0.8,"moda":1,"max":1.2,"unidade":"× o calculado","onde":"fixo e VSR","fonte":"premissa"},{"grupo":"Reatores e VSR","nome":"Falha grave de reator ou do VSR","tipo":"triangular","min":0.3,"moda":0.41,"max":0.53,"unidade":"% ao ano","onde":"fixo e VSR","fonte":"CIGRÉ TB 939; Martin e Tenbohlen 2026"},{"grupo":"Reatores e VSR","nome":"Falha do comutador do VSR","tipo":"triangular","min":0.04,"moda":0.1,"max":0.16,"unidade":"% ao ano","onde":"VSR","fonte":"CIGRÉ TB 642 e TB 939 (derivado)"},{"grupo":"Reatores e VSR","nome":"Trocas de tap além das que os dados enxergam","tipo":"uniforme","min":1,"moda":null,"max":2,"unidade":"× o calculado","onde":"VSR","fonte":"premissa (dados a cada 30 min ou 1 h)"},{"grupo":"Reatores e VSR","nome":"Custo da manutenção do comutador","tipo":"triangular","min":1,"moda":2,"max":3,"unidade":"% do VSR","onde":"VSR","fonte":"premissa"},{"grupo":"Vão de manobra","nome":"Operação e manutenção de rotina do vão","tipo":"triangular","min":0.5,"moda":1,"max":2,"unidade":"% do vão por ano","onde":"fixo (2 vãos) e VSR (1 vão)","fonte":"premissa; teto da ANEEL (NT 103/2024)"},{"grupo":"Só na visão do sistema","nome":"Chance de a falha grave de disjuntor cortar carga","tipo":"uniforme","min":2,"moda":null,"max":10,"unidade":"%","onde":"fixo e VSR","fonte":"premissa"},{"grupo":"Só na visão do sistema","nome":"Valor da energia perdida no VSR","tipo":"triangular","min":150,"moda":250,"max":400,"unidade":"R$ por MWh","onde":"VSR","fonte":"premissa"}],"eventos":[{"nome":"Falhas de disjuntor em cada mês","texto":"Sorteio de Poisson com a taxa da simulação. A taxa de cada disjuntor fica entre a do que quase não manobra e a do que manobra todo dia, conforme as manobras dele."},{"nome":"Tempo de reparo do disjuntor","texto":"Reparo no local: mediana de 24 horas, 9 em cada 10 até 100 horas. Na fábrica: de 14 a 42 dias. Explosão: 30 dias e 1,5 vez o preço do disjuntor."},{"nome":"Falha grave de reator ou do VSR","texto":"Custo de 30% a 100% do equipamento. O VSR sem reserva fica parado com mediana de 180 dias (9 em cada 10 até 540 dias). No fixo de 500 kV, a fase reserva entra em até 3 horas."},{"nome":"Falha do comutador do VSR","texto":"De 3 a 21 dias parado e custo de 5% a 15% do preço do VSR."},{"nome":"Carga cortada (só visão do sistema)","texto":"Energia não suprida com mediana de 11,5 MWh por corte (9 em cada 10 até cerca de 140 MWh), dos dados do ONS de 2016 a 2025, ao custo do déficit."}],"cenarios":{"urbano":{"nome":"Centro Urbano","kv":230,"visoes":{"concessionaria":{"hist":{"ini":-103,"n":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,2,1,1,0,3,3,0,2,2,1,3,0,2,2,0,1,1,3,4,1,0,0,2,2,0,2,3,3,1,3,3,3,3,3,2,5,5,5,3,5,7,6,5,7,12,4,3,9,7,6,6,13,13,15,15,18,17,16,34,31,73,138,226,352,374,371,457,350,317,258,153,127,85,46,46,35,23,28,28,26,15,10,19,13,16,15,11,9,6,6,7,9,3,3,1,2,1,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},"stats":{"p10":3.09,"p50":3.63,"p90":4.27,"media":3.57,"ppos":0.986,"negativas":56,"min":-10.2,"max":8.87,"ep_media":0.016}},"sin":{"hist":{"ini":-99,"n":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,2,0,0,1,2,0,1,0,1,2,2,1,0,1,1,1,2,1,1,0,0,0,3,5,2,3,1,1,3,3,1,1,3,4,4,6,3,6,5,3,3,4,12,5,9,6,4,11,10,9,11,8,8,9,8,11,9,13,8,14,14,14,20,15,14,14,23,27,52,126,185,227,294,332,371,384,307,290,228,166,135,90,52,69,39,39,28,23,29,23,20,13,9,14,6,11,8,5,5,9,5,1,4,0,2,2,1,1,0,0,0,0,0,1,0,0,0,0,0,0,1]},"stats":{"p10":3.12,"p50":3.8,"p90":4.53,"media":3.7,"ppos":0.9835,"negativas":66,"min":-9.83,"max":8.35,"ep_media":0.017}}},"preco_vsr":8.61,"preco_fixos":5.82},"campo":{"nome":"Campo","kv":500,"visoes":{"concessionaria":{"hist":{"ini":-401,"n":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,2,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,2,0,0,0,0,1,1,0,1,0,1,0,0,0,1,0,0,0,2,2,3,0,0,0,1,1,0,0,1,1,0,0,3,0,1,0,0,0,2,0,0,1,2,1,0,1,1,0,1,1,1,0,1,0,1,2,0,2,0,1,1,1,1,1,0,1,3,1,3,1,0,0,1,0,3,2,0,0,0,1,1,0,0,1,1,6,1,0,0,0,0,0,1,0,2,2,1,3,3,0,1,1,0,1,0,1,1,2,0,0,0,1,0,0,0,2,1,4,2,4,1,1,0,0,1,0,0,1,1,1,2,0,4,1,1,2,2,1,0,1,2,2,2,4,5,1,3,2,2,1,5,1,2,1,2,2,1,3,4,4,1,1,3,1,6,6,4,1,2,3,0,3,6,6,4,3,4,7,3,3,8,6,5,2,5,6,2,6,3,4,8,5,6,5,6,11,9,6,7,5,8,13,21,19,31,61,54,51,63,82,94,93,106,97,99,92,105,95,111,120,97,104,119,89,98,112,99,87,83,90,105,88,77,82,67,51,60,63,36,31,36,32,29,15,31,27,19,8,17,12,15,15,12,10,13,13,5,10,4,4,5,5,7,5,7,4,5,8,5,8,5,2,8,9,5,3,4,4,3,4,4,1,3,4,2,2,5,1,3,3,3,4,1,3,3,5,3,3,4,5,1,3,4,1,2,2,1,1,2,1,4,5,4,3,3,1,2,0,2,1,1,1,0,2,0,3,0,1,3,0,0,0,1,2,1,1,0,0,0,2,0,1,0,0,2,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},"stats":{"p10":6.58,"p50":8.6,"p90":10.99,"media":8.24,"ppos":0.9633,"negativas":147,"min":-40.05,"max":28.52,"ep_media":0.069}},"sin":{"hist":{"ini":-417,"n":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,2,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,2,1,0,0,0,1,0,0,1,1,0,1,1,2,0,1,0,0,0,0,1,0,0,0,0,0,1,2,1,0,0,1,1,0,0,0,0,0,0,0,3,1,1,3,0,2,0,0,1,0,0,1,1,1,1,1,1,0,1,0,0,0,1,2,0,1,0,0,0,0,1,0,0,2,1,1,1,1,1,1,1,0,1,3,1,2,1,2,0,1,0,0,0,0,1,3,0,1,2,1,1,1,2,1,4,2,4,1,1,2,0,0,0,1,1,1,5,0,2,1,1,2,0,3,0,1,2,1,4,6,0,0,1,1,0,0,1,0,6,3,3,0,4,1,1,4,1,2,2,1,1,2,4,1,2,1,1,2,2,2,1,2,2,4,1,3,5,4,2,2,5,2,5,7,3,1,5,4,1,5,4,0,2,2,1,4,3,5,6,3,3,6,4,5,6,7,5,3,3,4,7,5,2,6,5,5,6,3,7,8,4,8,12,7,20,14,18,17,34,30,43,39,39,53,61,79,71,72,59,68,65,79,73,77,78,55,72,79,80,82,78,76,64,65,75,85,83,68,65,78,74,62,73,58,59,57,44,59,42,50,43,40,38,32,30,31,22,31,28,26,13,13,18,15,14,15,7,17,13,9,15,11,9,9,7,12,11,8,7,9,11,6,11,4,7,6,3,5,7,6,5,4,7,8,6,7,3,7,5,2,9,5,1,5,2,6,4,4,7,2,6,4,4,5,2,1,1,1,3,0,3,4,0,2,2,3,1,3,0,1,1,0,3,1,1,1,1,2,2,1,2,0,2,2,0,2,0,4,2,2,0,1,1,0,0,0,1,1,0,1,1,2,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1]},"stats":{"p10":6.05,"p50":9.06,"p90":12.48,"media":8.64,"ppos":0.9547,"negativas":181,"min":-41.66,"max":24.31,"ep_media":0.078}}},"preco_vsr":42.54,"preco_fixos":26.97},"polo_eolico":{"nome":"Polo eólico","kv":500,"visoes":{"concessionaria":{"hist":{"ini":-439,"n":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,1,0,1,1,0,0,0,1,0,1,0,1,0,0,2,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,1,0,1,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,2,0,1,0,1,0,0,1,0,0,0,0,1,0,2,0,0,0,0,1,0,1,1,1,1,0,0,0,1,1,2,0,0,0,0,2,2,1,1,0,1,0,0,0,0,2,1,1,0,1,2,0,0,2,0,0,1,0,1,1,0,1,1,0,1,0,0,0,3,0,0,0,0,1,0,0,1,1,1,1,0,1,0,0,2,1,2,0,1,0,2,1,3,1,0,1,4,0,1,2,0,1,0,1,1,0,2,1,3,2,0,2,1,0,1,0,1,2,0,3,2,0,1,1,1,0,0,2,1,3,1,2,1,0,0,2,2,1,2,1,1,1,3,0,2,1,1,2,0,1,0,2,1,0,0,2,2,1,1,1,1,4,0,1,0,2,1,2,0,1,2,4,2,4,7,0,3,5,2,4,2,0,3,4,1,3,4,2,1,1,2,6,4,4,5,5,3,4,5,8,2,4,6,5,3,1,4,10,3,8,14,4,11,13,20,20,27,51,57,59,66,71,83,102,120,99,103,102,107,97,116,116,92,115,106,102,101,81,100,97,103,83,95,91,79,76,72,62,53,48,37,45,48,36,27,27,27,16,15,9,11,5,8,7,11,8,5,4,9,8,11,9,8,8,13,7,4,5,8,10,4,6,13,4,4,3,4,6,6,6,8,6,5,2,5,7,4,1,5,3,3,5,2,2,5,2,3,3,1,0,4,2,3,3,0,2,3,2,3,2,1,2,3,2,3,1,3,0,2,1,0,3,2,3,2,2,0,2,0,0,3,1,1,1,1,1,2,0,2,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},"stats":{"p10":6.52,"p50":8.4,"p90":10.72,"media":7.99,"ppos":0.9587,"negativas":165,"min":-43.8,"max":25.08,"ep_media":0.076}},"sin":{"hist":{"ini":-296,"n":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,2,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,1,1,0,0,1,0,0,2,1,0,1,0,1,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0,1,0,2,1,1,0,1,0,0,1,0,2,0,0,1,0,0,0,2,0,2,0,1,0,0,2,1,2,0,1,1,1,0,0,2,1,2,0,0,0,1,0,1,0,0,0,1,1,1,0,1,0,1,0,1,0,2,0,2,1,1,0,2,1,0,1,0,1,0,2,3,0,0,0,2,4,3,3,1,2,4,0,1,0,0,2,1,0,0,2,0,2,0,1,0,1,0,0,2,0,0,0,0,0,3,1,0,1,2,3,0,2,1,0,0,1,3,1,1,1,3,2,1,0,0,2,2,0,1,0,3,3,3,0,1,2,2,2,2,1,1,1,4,1,0,1,0,1,1,3,1,1,3,3,2,2,2,6,1,2,2,1,0,2,2,1,0,3,1,2,2,1,0,1,1,2,3,2,1,4,1,1,3,1,4,1,2,3,3,2,0,2,3,4,2,1,1,0,1,2,4,2,0,4,8,2,5,2,2,6,1,2,3,0,3,2,1,4,4,4,5,1,4,2,3,7,6,4,7,3,4,1,6,3,5,7,4,6,8,5,16,19,13,24,35,39,36,41,40,50,60,53,73,84,58,82,75,71,61,76,75,73,72,69,95,76,75,81,76,81,78,75,80,86,62,74,77,61,67,60,78,51,62,50,64,32,36,37,42,27,28,32,20,26,28,32,21,14,14,11,10,13,8,7,15,12,11,7,12,10,6,7,11,7,2,8,6,9,10,6,6,8,7,9,8,4,5,3,3,6,1,3,5,5,3,3,5,5,3,7,3,2,1,2,4,2,5,1,6,2,5,2,1,2,2,2,0,4,3,2,2,2,2,2,0,1,0,1,3,2,0,4,3,0,3,2,3,0,3,1,2,0,2,0,1,0,1,0,3,0,0,2,1,0,2,0,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},"stats":{"p10":6.0,"p50":8.95,"p90":12.04,"media":8.36,"ppos":0.9447,"negativas":221,"min":-29.54,"max":29.16,"ep_media":0.083}}},"preco_vsr":42.54,"preco_fixos":26.97}}}</script>
+<script>
+(function () {
+  'use strict';
+  var D = JSON.parse(document.getElementById('dados').textContent);
+  var ORDEM = ['urbano', 'campo', 'polo_eolico'];
+  var VISOES = [['concessionaria', 'Transmissora'], ['sin', 'Sistema (SIN)']];
+  var VIS_NOTA = {
+    concessionaria: 'visão da transmissora: fluxo de caixa a 12,11% ao ano, com a multa da ANEEL (Parcela Variável).',
+    sin: 'visão do sistema (SIN): custo para o país a 8,5% ao ano (taxa social), com energia não suprida e perdas, sem Parcela Variável.'
+  };
+  var state = { cen: 'campo', vis: 'concessionaria' };
+  try { var sv = localStorage.getItem('polivsr-mc'); if (sv && D.cenarios[sv]) state.cen = sv; } catch (e) {}
+  try { var vv = localStorage.getItem('polivsr-mc-vis'); if (vv && D.cenarios.campo.visoes[vv]) state.vis = vv; } catch (e) {}
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(id) { return document.getElementById(id); }
+  function nf(d) { return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function mi(x, d) { if (d === undefined) d = Math.abs(x) < 100 ? 1 : 0; return (x < -1e-9 ? '− ' : '') + 'R$ ' + nf(d).format(Math.abs(x)) + ' mi'; }
+  function smi(x, d) { return (x > 1e-9 ? '+ ' : '') + mi(x, d); }
+  function pct(x, d) { return nf(d || 0).format(x * 100) + '%'; }
+  function S(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function T(p, x, y, txt, attrs) { var t = S('text', Object.assign({ x: x, y: y }, attrs || {}), p); t.textContent = txt; return t; }
+  function lin(d0, d1, r0, r1) { return function (v) { return r0 + (v - d0) / (d1 - d0 || 1) * (r1 - r0); }; }
+  function ticks(lo, hi, n) {
+    var span = hi - lo || 1, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), norm = raw / mag;
+    var step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag, out = [];
+    for (var v = Math.ceil(lo / step) * step; v <= hi + step * 1e-6; v += step) out.push(Math.abs(v) < step * 1e-6 ? 0 : v);
+    return { list: out, step: step };
+  }
+  function pathOf(xs, ys) { var d = ''; for (var i = 0; i < xs.length; i++) d += (i ? 'L' : 'M') + xs[i].toFixed(1) + ',' + ys[i].toFixed(1); return d; }
+  function areaOf(xs, lo, hi) { var d = ''; for (var i = 0; i < xs.length; i++) d += (i ? 'L' : 'M') + xs[i].toFixed(1) + ',' + hi[i].toFixed(1); for (var j = xs.length - 1; j >= 0; j--) d += 'L' + xs[j].toFixed(1) + ',' + lo[j].toFixed(1); return d + 'Z'; }
+  function frame(host, h, m) {
+    host.innerHTML = ''; var w = Math.max(280, host.clientWidth || 600);
+    var svg = S('svg', { viewBox: '0 0 ' + w + ' ' + h, width: w, height: h, role: 'img' }, host);
+    return { svg: svg, w: w, h: h, x0: m.l, x1: w - m.r, y0: h - m.b, y1: m.t };
+  }
+  function yAxis(f, sy, tk) {
+    tk.list.forEach(function (v) {
+      var y = sy(v);
+      S('line', { x1: f.x0, x2: f.x1, y1: y, y2: y, stroke: v === 0 ? '#62748e' : '#e2e8f0', 'stroke-width': 1, fill: 'none' }, f.svg);
+      T(f.svg, f.x0 - 8, y + 4, nf(Math.abs(tk.step) < 1 ? 1 : 0).format(v), { 'text-anchor': 'end' });
+    });
+  }
+  function casas(v) { if (v === null || v === undefined) return 0; var s = String(v); return s.indexOf('.') < 0 ? 0 : s.length - s.indexOf('.') - 1; }
+  function fmtN(v, d) { return nf(d === undefined ? casas(v) : d).format(v); }
+
+  /* ---------- seletor ---------- */
+  function buildSeg() {
+    var host = el('seg'); host.innerHTML = '';
+    ORDEM.forEach(function (k) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = D.cenarios[k].nome; b.setAttribute('aria-pressed', String(k === state.cen));
+      b.addEventListener('click', function () { state.cen = k; try { localStorage.setItem('polivsr-mc', k); } catch (e) {} render(); });
+      host.appendChild(b);
+    });
+    var hv = el('seg-vis'); hv.innerHTML = '';
+    VISOES.forEach(function (v) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = v[1]; b.setAttribute('aria-pressed', String(v[0] === state.vis));
+      b.addEventListener('click', function () { state.vis = v[0]; try { localStorage.setItem('polivsr-mc-vis', v[0]); } catch (e) {} render(); });
+      hv.appendChild(b);
+    });
+  }
+
+  /* ---------- histograma ---------- */
+  var KS = [1, 2, 4, 5, 10, 20, 50];
+  function renderHist() {
+    var c = D.cenarios[state.cen].visoes[state.vis], h = c.hist, st = c.stats, P = D.meta.passo_hist;
+    var host = el('hi-plot'), f = frame(host, 276, { l: 44, r: 16, t: 42, b: 30 });
+    var g0 = h.ini, g1 = h.ini + h.n.length, pw = f.x1 - f.x0, k = KS[KS.length - 1];
+    for (var q = 0; q < KS.length; q++) { var kk = KS[q], nb = Math.floor((g1 - 1) / kk) - Math.floor(g0 / kk) + 1; if (pw / nb >= 3) { k = kk; break; } }
+    var a0 = Math.floor(g0 / k), a1 = Math.floor((g1 - 1) / k), cnt = [];          // faixas alinhadas ao zero: a faixa a vai de a·k·0,1 a (a+1)·k·0,1
+    for (var a = a0; a <= a1; a++) cnt.push(0);
+    h.n.forEach(function (v, i) { cnt[Math.floor((g0 + i) / k) - a0] += v; });
+    var w = k * P, n = cnt.length, x0 = a0 * w, x1 = (a1 + 1) * w;
+    el('hi-sub').textContent = 'Quantas simulações terminaram em cada faixa de ' + mi(w, w < 1 ? 1 : 0) + ' de VPL';
+    var mx = Math.max.apply(null, cnt);
+    var sx = lin(x0, x1, f.x0, f.x1), sy = lin(0, mx * 1.08, f.y0, f.y1);
+    var tk = ticks(0, mx * 1.08, 4); yAxis(f, sy, tk);
+    var xt = ticks(x0, x1, 7); xt.list.forEach(function (v) { T(f.svg, sx(v), f.y0 + 18, nf(0).format(v), { 'text-anchor': 'middle' }); });
+    T(f.svg, f.x1, f.y0 + 30, 'VPL em R$ mi', { 'text-anchor': 'end' });
+    T(f.svg, f.x0 - 8, f.y1 - 30, 'simulações', { 'text-anchor': 'start' });
+    var gap = pw / n >= 3 ? 0.4 : 0;
+    for (var i = 0; i < n; i++) {
+      if (!cnt[i]) continue;
+      var lo = (a0 + i) * w, xa = sx(lo) + gap, xb = sx(lo + w) - gap, y = Math.min(sy(cnt[i]), f.y0 - 2), negv = a0 + i < 0;
+      S('rect', { x: xa, y: y, width: Math.max(1, xb - xa), height: f.y0 - y, fill: negv ? '#e7000b' : '#009966', 'fill-opacity': negv ? 0.9 : 0.75 }, f.svg);
+    }
+    S('line', { x1: sx(0), x2: sx(0), y1: f.y1, y2: f.y0, stroke: '#62748e', 'stroke-width': 1 }, f.svg);
+    var pts = [['P10', st.p10], ['Mediana', st.p50], ['P90', st.p90]];
+    pts.forEach(function (p, k) {
+      var x = sx(p[1]);
+      S('line', { x1: x, x2: x, y1: k === 1 ? f.y1 - 18 : f.y1 - 2, y2: f.y0, stroke: '#020618', 'stroke-width': 1, 'stroke-dasharray': '3 3' }, f.svg);
+      T(f.svg, x + (k === 0 ? -4 : k === 2 ? 4 : 0), k === 1 ? f.y1 - 24 : f.y1 - 8, p[0], { class: 'lab', 'text-anchor': k === 0 ? 'end' : k === 2 ? 'start' : 'middle' });
+    });
+    if (st.negativas) {                                            // rótulo à esquerda do zero; encurta se não couber
+      var tn = T(f.svg, sx(0) - 8, f.y0 - 14, nf(0).format(st.negativas) + ' futuros abaixo de zero', { class: 'lab-red', 'text-anchor': 'end' });
+      if (tn.getComputedTextLength && tn.getComputedTextLength() > sx(0) - 8 - f.x0) tn.textContent = nf(0).format(st.negativas) + ' abaixo de zero';
+    }
+    f.svg.setAttribute('aria-label', 'Histograma dos 4.000 VPL simulados, em faixas de ' + mi(w, w < 1 ? 1 : 0));
+    el('stats').innerHTML = '';
+    [['Mediana', smi(st.p50), 'g'], ['Pessimista (P10)', mi(st.p10), ''], ['Otimista (P90)', mi(st.p90), ''], ['Chance de compensar', pct(st.ppos), st.ppos >= 0.5 ? 'g' : 'r']].forEach(function (s) {
+      var d = document.createElement('div'); d.className = 'stat'; var p = document.createElement('p'); p.textContent = s[0]; var b = document.createElement('strong');
+      b.className = 'num ' + s[2]; b.textContent = s[1]; d.appendChild(p); d.appendChild(b); el('stats').appendChild(d);
+    });
+    el('hi-read').textContent = 'A maioria dos futuros fica entre ' + mi(st.p10) + ' e ' + mi(st.p90) + '. ' +
+      (st.negativas ? 'Os ' + nf(0).format(st.negativas) + ' futuros negativos (' + pct(st.negativas / D.meta.simulacoes, 1) + ') são os casos em que o próprio VSR tem uma falha grave' + (state.vis === 'sin' ? ', cujo reparo custa de 30% a 100% do preço dele.' : ' e, sem unidade reserva, fica meses parado.') : '');
+  }
+
+  /* ---------- parâmetros ---------- */
+  function glyph(p) {
+    var svg = S('svg', { viewBox: '0 0 128 30', 'aria-hidden': 'true' });
+    var sx = lin(p.min, p.max, 6, 122);
+    S('line', { x1: 2, x2: 126, y1: 26, y2: 26, stroke: '#cad5e2', 'stroke-width': 1 }, svg);
+    if (p.tipo === 'triangular') S('polygon', { points: sx(p.min) + ',26 ' + sx(p.moda) + ',4 ' + sx(p.max) + ',26', fill: '#d0fae5', stroke: '#009966', 'stroke-width': 1.5, 'stroke-linejoin': 'round' }, svg);
+    else S('rect', { x: sx(p.min), y: 9, width: sx(p.max) - sx(p.min), height: 17, fill: '#d0fae5', stroke: '#009966', 'stroke-width': 1.5 }, svg);
+    return svg;
+  }
+  function faixa(p) {
+    var u = p.unidade, sp = /^%/.test(u) ? '' : ' ', d = Math.max(casas(p.min), casas(p.moda), casas(p.max));
+    return { a: fmtN(p.min, d) + ' a ' + fmtN(p.max, d) + sp + u, b: p.tipo === 'triangular' ? 'mais provável: ' + fmtN(p.moda, d) : 'todos com a mesma chance' };
+  }
+  var NOTAS = {
+    'Disjuntores': 'Valem para cada disjuntor das duas opções. O do reator fixo manobra todo dia; o do VSR quase nunca.',
+    'Reatores e VSR': 'A falha grave vale por unidade, para os reatores fixos e para o VSR.',
+    'Vão de manobra': 'O fixo tem dois vãos; o VSR, um.',
+    'Só na visão do sistema': 'Entram só quando a visão escolhida é Sistema (SIN); não entram na conta da transmissora.'
+  };
+  function buildParams() {
+    var host = el('groups'); host.innerHTML = ''; var grupos = [];
+    D.parametros.forEach(function (p) { if (grupos.indexOf(p.grupo) < 0) grupos.push(p.grupo); });
+    el('n-par').textContent = D.parametros.length;
+    grupos.forEach(function (g) {
+      var sec = document.createElement('div'); sec.className = 'grp';
+      var h = document.createElement('h3'); h.textContent = g; sec.appendChild(h);
+      if (NOTAS[g]) { var nn = document.createElement('p'); nn.className = 'gnote'; nn.textContent = NOTAS[g]; sec.appendChild(nn); }
+      var list = document.createElement('div'); list.className = 'plist';
+      D.parametros.filter(function (p) { return p.grupo === g; }).forEach(function (p) {
+        var row = document.createElement('div'); row.className = 'prow';
+        var who = document.createElement('div'); who.className = 'who';
+        var nm = document.createElement('p'); nm.className = 'nm'; nm.textContent = p.nome; who.appendChild(nm);
+        var mt = document.createElement('p'); mt.className = 'mt'; mt.textContent = 'Entra em: ' + p.onde + ' · Fonte: ' + p.fonte; who.appendChild(mt);
+        row.appendChild(who); row.appendChild(glyph(p));
+        var fx = faixa(p), rg = document.createElement('p'); rg.className = 'rg num'; rg.textContent = fx.a;
+        var sm = document.createElement('small'); sm.textContent = fx.b; rg.appendChild(sm); row.appendChild(rg);
+        list.appendChild(row);
+      });
+      sec.appendChild(list); host.appendChild(sec);
+    });
+    var ev = el('evlist'); ev.innerHTML = '';
+    D.eventos.forEach(function (e) {
+      var a = document.createElement('article'); a.className = 'ev'; var h = document.createElement('h4'); h.textContent = e.nome; var p = document.createElement('p'); p.textContent = e.texto;
+      a.appendChild(h); a.appendChild(p); ev.appendChild(a);
+    });
+    var t = el('tech'); t.innerHTML = '';
+    var c = D.cenarios.campo.visoes.concessionaria;
+    ['4.000 simulações por cenário, visão e premissa, cada uma com 360 meses; gerador numpy com semente fixa (' + D.meta.semente + '), então o resultado se repete a cada execução.',
+     'Números aleatórios comuns: os mesmos sorteios servem às duas opções e a todos os preços, então a diferença entre elas vem das escolhas, não do acaso.',
+     'Precisão: no Campo, visão da transmissora, o erro-padrão da média do VPL é de cerca de ' + mi(c.stats.ep_media, 2) + '.',
+     'Esta página usa as premissas-base e os preços de referência (' + D.meta.precos + '). A visão da transmissora desconta a 12,11% ao ano; a do sistema (SIN), a 8,5% ao ano.',
+     'O histograma usa faixas de R$ 0,1 mi, agrupadas conforme a largura da tela; as faixas começam no zero, então nenhum retângulo mistura resultados positivos e negativos.',
+     'Os sorteios e as faixas desta página são conferidos contra o código do modelo (scripts 10 e 12 do projeto).'].forEach(function (s) {
+      var li = document.createElement('li'); li.textContent = s; t.appendChild(li);
+    });
+  }
+
+  function render() {
+    document.querySelectorAll('#seg button').forEach(function (b, i) { b.setAttribute('aria-pressed', String(ORDEM[i] === state.cen)); });
+    document.querySelectorAll('#seg-vis button').forEach(function (b, i) { b.setAttribute('aria-pressed', String(VISOES[i][0] === state.vis)); });
+    var c = D.cenarios[state.cen];
+    el('scen-note').textContent = c.nome + ', ' + c.kv + ' kV, ' + VIS_NOTA[state.vis] + ' VSR a ' + mi(c.preco_vsr) + ' contra dois reatores fixos a ' + mi(c.preco_fixos) + ' no total, nos preços de referência.';
+    renderHist();
+  }
+  buildSeg(); buildParams(); render();
+  var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(render, 120); });
+})();
+</script>
+<script>
+/* Dentro do site (?embed=1): sem o cabeçalho e o rodapé próprios, e os links entre as duas páginas mantêm o modo. */
+(function () {
+  if (!document.documentElement.classList.contains('embed')) return;
+  document.querySelectorAll('a[href]').forEach(function (a) {
+    var h = a.getAttribute('href');
+    if (/^[\w-]+\.html$/.test(h)) { a.setAttribute('href', h + '?embed=1'); a.removeAttribute('target'); a.removeAttribute('rel'); }
+  });
+})();
+</script>
+
+</html>
