@@ -171,6 +171,16 @@ function WindingRoadmapSection() {
     { label: 'F5 · 1 ano', start: 48, end: 60, highlighted: false },
   ]
   const yearTicks = ['0', '1 ano', '2 anos', '3 anos', '4 anos', '5 anos']
+  const rowHeight = 560
+  const roadmapPath = [
+    `M500 ${rowHeight / 2}`,
+    ...phases.slice(0, -1).map((_, index) => {
+      const side = index % 2 === 0 ? -1 : 1
+      const y = rowHeight * index + rowHeight / 2
+      return `C ${500 + side * 260} ${y + rowHeight * 0.33} ${500 + side * 260} ${y + rowHeight * 0.67} 500 ${rowHeight * (index + 1) + rowHeight / 2}`
+    }),
+  ].join(' ')
+  const mobileRoadmapPath = 'M500 50 C720 150 720 230 500 310 S280 470 500 570 S720 730 500 830 S280 990 500 1090 S720 1250 500 1450'
 
   return <section className="relative z-10 bg-gray-50 px-6 py-24 text-slate-900 sm:px-10">
     <div className="relative z-10 mx-auto max-w-6xl">
@@ -182,8 +192,15 @@ function WindingRoadmapSection() {
       <div className="mx-auto mt-8 max-w-3xl rounded-xl bg-white p-4 shadow-sm sm:mt-10 sm:p-6" aria-label="Cronograma das fases 1 a 5, de 0 a 5 anos">
         <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
           <span aria-hidden="true" />
-          <div className="flex justify-between text-[9px] font-medium text-slate-500 sm:text-xs">
-            {yearTicks.map(tick => <span key={tick} className="whitespace-nowrap">{tick}</span>)}
+          <div className="relative h-4 text-[9px] font-medium text-slate-500 sm:text-xs">
+            {yearTicks.map((tick, index) => <span
+              key={tick}
+              className="absolute top-0 whitespace-nowrap"
+              style={{
+                left: `${index * 20}%`,
+                transform: index === 0 ? 'none' : index === yearTicks.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)',
+              }}
+            >{tick}</span>)}
           </div>
         </div>
         <div className="mt-2 space-y-2">
@@ -199,8 +216,11 @@ function WindingRoadmapSection() {
         </div>
       </div>
       <div className="relative mx-auto mt-12 max-w-5xl sm:mt-16">
-        <svg className="pointer-events-none absolute inset-x-0 top-0 block h-full w-full overflow-visible opacity-40 sm:opacity-100" viewBox="0 0 1000 1500" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M500 50 C720 150 720 230 500 310 S280 470 500 570 S720 730 500 830 S280 990 500 1090 S720 1250 500 1450" fill="none" stroke="#e60000" strokeDasharray="10 14" strokeLinecap="round" strokeWidth="12" />
+        <svg className="pointer-events-none absolute inset-x-0 top-0 hidden h-full w-full overflow-visible sm:block" viewBox={`0 0 1000 ${phases.length * rowHeight}`} preserveAspectRatio="none" aria-hidden="true">
+          <path d={roadmapPath} fill="none" stroke="#e60000" strokeDasharray="10 14" strokeLinecap="round" strokeWidth="6" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <svg className="pointer-events-none absolute inset-x-0 top-0 block h-full w-full overflow-visible opacity-40 sm:hidden" viewBox="0 0 1000 1500" preserveAspectRatio="none" aria-hidden="true">
+          <path d={mobileRoadmapPath} fill="none" stroke="#e60000" strokeDasharray="10 14" strokeLinecap="round" strokeWidth="6" vectorEffect="non-scaling-stroke" />
         </svg>
         <div className="relative space-y-8 sm:space-y-0">
           {phases.map(phase => {
@@ -211,14 +231,14 @@ function WindingRoadmapSection() {
               : phase.number === 1
                 ? 'bg-red-50 text-red-700'
                 : 'bg-slate-100 text-slate-900'
-            return <article key={phase.number} className={`relative flex min-h-0 items-center sm:min-h-[420px] ${right ? 'sm:justify-end' : 'sm:justify-start'}`}>
+            return <article key={phase.number} className={`relative flex min-h-0 items-center sm:h-[560px] ${right ? 'sm:justify-end' : 'sm:justify-start'}`}>
               <div className={`relative z-10 w-full rounded-2xl bg-white p-6 shadow-lg sm:w-[42%] ${completed ? 'border border-red-100' : 'border border-slate-100'}`}>
                 <div className={`mb-4 inline-flex rounded-full px-3 py-1 text-xs font-bold ${badgeClass}`}>{phase.status}</div>
                 <h3 className="text-2xl font-bold">Fase {phase.number} · {phase.title}</h3>
                 <p className="mt-3 leading-7 text-slate-700">{phase.description}</p>
                 <footer className="mt-5 border-t border-slate-100 pt-4 text-sm font-semibold leading-6 text-slate-900"><span className="text-red-600">Resultado:</span> {phase.result}</footer>
               </div>
-              <span className={`absolute left-4 top-6 z-20 size-5 rounded-full border-4 border-gray-50 sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 ${completed ? 'bg-red-600' : 'bg-slate-400'}`} />
+              <span className={`absolute left-4 top-6 z-20 size-5 rounded-full border-4 border-gray-50 sm:left-1/2 sm:top-1/2 sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2 ${completed ? 'bg-red-600' : 'bg-slate-400'}`} />
             </article>
           })}
         </div>
