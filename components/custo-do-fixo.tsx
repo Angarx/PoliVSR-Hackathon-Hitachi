@@ -519,7 +519,7 @@ export default function CustoDoFixo() {
     <div className="mx-auto max-w-7xl">
       <header className="mx-auto mb-8 max-w-6xl text-center">
         <p className="text-xs font-bold uppercase tracking-[.25em] text-red-600">Simulação financeira</p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">O Custo do Fixo: Simulador Estatístico do <span className="whitespace-nowrap">VSR<InfoTip text={`Modelo PoliVSR · ${numberText(model.meta.simulacoes)} simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · ${model.meta.moeda}`} /></span></h1>
+        <h1 className="mt-3 text-5xl font-black tracking-tight sm:text-5xl">O Custo do Fixo: Simulador Estatístico do <span className="whitespace-nowrap">VSR<InfoTip text={`Modelo PoliVSR · ${numberText(model.meta.simulacoes)} simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · ${model.meta.moeda}`} /></span></h1>
       </header>
 
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(280px,.82fr)_minmax(0,1.18fr)]">
