@@ -115,7 +115,41 @@ const [hour, setHour] = useState(0)
     const now = new Date(); setHour(now.getHours() + (now.getMinutes() >= 30 ? 0.5 : 0))
   }, [])
   const maneuvers = Math.round(cumulativeOperations[Math.round(hour * 2)])
-  return <><section className="bg-slate-950 px-5 pb-24 pt-32 text-left text-white sm:px-8 sm:pt-40"><div className="mx-auto flex max-w-6xl flex-col items-start"><p className="mb-5 self-center text-center text-xs font-bold uppercase tracking-[.3em] text-red-400">PoliVSR · pesquisa aplicada</p><p className="text-2xl font-semibold text-white sm:text-3xl">{heroLead(hour)}</p><h1 className="my-2 text-7xl font-black leading-none tracking-[-.07em] text-red-600 sm:text-8xl lg:text-[9rem]">{maneuvers} manobras</h1><p className="text-2xl font-semibold text-white sm:text-3xl">de disjuntor para ligar e desligar reatores.</p><p className="mt-3 max-w-xl text-base text-slate-300 sm:text-lg">{heroNarrative(hour)}</p><div className="mt-14 w-full"><CurveChart hour={hour} onChange={setHour} /></div><p className="mt-8 text-sm text-slate-400 sm:text-base">Arraste sobre a curva para acompanhar a operação ao longo do dia.</p><p className="mt-2 max-w-3xl text-xs leading-5 text-slate-400">{heroEstimateNote}</p><button type="button" onClick={() => onNavigate('simulator')} className="relative z-0 mx-auto mt-10 overflow-hidden rounded-full bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-[0_0_12px_3px_rgba(230,0,0,0.38)] animate-cta-aurora transition hover:bg-red-700">Acessar Calculadora de OPEX</button></div></section><section id="about-project" className="relative z-10 -mt-16 rounded-xl bg-white px-6 py-24 shadow-xl"><div className="mx-auto max-w-5xl"><p className="mb-4 text-xs font-bold uppercase tracking-[.25em] text-red-600">O projeto PoliVSR</p><h2 className="text-4xl font-black tracking-tight sm:text-6xl">Da pesquisa aplicada à rede do futuro.</h2><div className="mt-16 divide-y divide-slate-200">{blocks.map(([title, text], index) => <article key={title} className={`grid gap-6 py-12 md:grid-cols-[.8fr_1.4fr] ${index % 2 ? 'bg-slate-50' : 'bg-white'}`}><h3 className="text-2xl font-bold">{title}</h3><p className="text-lg leading-8 text-slate-600">{text}</p></article>)}</div></div></section><WindingRoadmapSection /><PageEndNavigation activeTab="about" onNavigate={onNavigate} /><ContactSection /></>
+  const renderBlock = (index: 0 | 1) => {
+    const [title, text] = blocks[index]
+    return <article key={title} className={`grid gap-6 py-12 md:grid-cols-[.8fr_1.4fr] ${index % 2 ? 'bg-slate-50' : 'bg-white'}`}>
+      <h3 className="text-2xl font-bold">{title}</h3>
+      <p className="text-lg leading-8 text-slate-600">{text}</p>
+    </article>
+  }
+  return <>
+    <section className="bg-slate-950 px-5 pb-24 pt-32 text-left text-white sm:px-8 sm:pt-40">
+      <div className="mx-auto flex max-w-6xl flex-col items-start">
+        <p className="mb-5 self-center text-center text-xs font-bold uppercase tracking-[.3em] text-red-400">PoliVSR · pesquisa aplicada</p>
+        <p className="text-2xl font-semibold text-white sm:text-3xl">{heroLead(hour)}</p>
+        <h1 className="my-2 text-7xl font-black leading-none tracking-[-.07em] text-red-600 sm:text-8xl lg:text-[9rem]">{maneuvers} manobras</h1>
+        <p className="text-2xl font-semibold text-white sm:text-3xl">de disjuntor para ligar e desligar reatores.</p>
+        <p className="mt-3 max-w-xl text-base text-slate-300 sm:text-lg">{heroNarrative(hour)}</p>
+        <div className="mt-14 w-full"><CurveChart hour={hour} onChange={setHour} /></div>
+        <p className="mt-8 text-sm text-slate-400 sm:text-base">Arraste sobre a curva para acompanhar a operação ao longo do dia.</p>
+        <p className="mt-2 max-w-3xl text-xs leading-5 text-slate-400">{heroEstimateNote}</p>
+        <button type="button" onClick={() => onNavigate('simulator')} className="relative z-0 mx-auto mt-10 overflow-hidden rounded-full bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-[0_0_12px_3px_rgba(230,0,0,0.38)] animate-cta-aurora transition hover:bg-red-700">Acessar Calculadora de OPEX</button>
+      </div>
+    </section>
+    <section id="about-project" className="relative z-10 -mt-16 rounded-xl bg-white px-6 pt-24 pb-12 shadow-xl">
+      <div className="mx-auto max-w-5xl">
+        <p className="mb-4 text-xs font-bold uppercase tracking-[.25em] text-red-600">O projeto PoliVSR</p>
+        <h2 className="text-4xl font-black tracking-tight sm:text-6xl">Da pesquisa aplicada à rede do futuro.</h2>
+        <div className="mt-16 divide-y divide-slate-200">{renderBlock(0)}</div>
+      </div>
+    </section>
+    <WindingRoadmapSection />
+    <section className="bg-white px-6 pb-24 pt-12">
+      <div className="mx-auto max-w-5xl">{renderBlock(1)}</div>
+    </section>
+    <PageEndNavigation activeTab="about" onNavigate={onNavigate} />
+    <ContactSection />
+  </>
 }
 
 function WindingRoadmapSection() {
@@ -188,44 +222,6 @@ function WindingRoadmapSection() {
         <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Roadmap</h2>
         <p className="mt-5 text-lg leading-8 text-slate-600">Um caminho progressivo para transformar pesquisa aplicada em decisões mais seguras para a rede.</p>
       </header>
-      <div className="mx-auto mt-8 max-w-3xl rounded-xl bg-white p-4 shadow-sm sm:mt-10 sm:p-6" aria-label="Cronograma das fases 1 a 5, de 0 a 5 anos">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-bold">Cronograma</h3>
-          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
-            <span className="size-2.5 rounded-full bg-red-600" aria-hidden="true" />
-            Próxima
-          </span>
-        </div>
-        <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
-          <span aria-hidden="true" />
-          <div className="relative h-4 text-[9px] font-medium text-slate-500 sm:text-xs">
-            {yearTicks.map((tick, index) => <span
-              key={tick}
-              className="absolute top-0 whitespace-nowrap"
-              style={{
-                left: `${index * 20}%`,
-                transform: index === 0 ? 'none' : index === yearTicks.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)',
-              }}
-            >{tick}</span>)}
-          </div>
-        </div>
-        <div className="mt-2 space-y-2">
-          {timeline.map(phase => <div key={phase.label} className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
-            <span className="text-[10px] font-semibold text-slate-600 sm:text-xs">{phase.label}</span>
-            <div className="relative h-3 overflow-hidden rounded-full bg-slate-50">
-              {yearTicks.map((tick, index) => <span
-                key={tick}
-                className="pointer-events-none absolute inset-y-0 z-0 border-l border-slate-200"
-                style={{ left: `${index * 20}%` }}
-              />)}
-              <span
-                className={`absolute inset-y-0 z-10 rounded-full ${phase.highlighted ? 'bg-red-600' : 'bg-slate-300'}`}
-                style={{ left: `${phase.start / 60 * 100}%`, width: `${(phase.end - phase.start) / 60 * 100}%` }}
-              />
-            </div>
-          </div>)}
-        </div>
-      </div>
       <div className="relative mx-auto mt-12 max-w-5xl pl-16 lg:pl-0">
         <div className="absolute bottom-6 left-6 top-6 z-0 border-l-[3px] border-dashed border-red-300 lg:hidden" aria-hidden="true" />
         <svg className="pointer-events-none absolute inset-x-0 top-0 hidden h-full w-full overflow-visible lg:block" viewBox={`0 0 1000 ${phases.length * rowHeight}`} preserveAspectRatio="none" aria-hidden="true">
@@ -265,6 +261,44 @@ function WindingRoadmapSection() {
               </div>
             </article>
           })}
+        </div>
+      </div>
+      <div className="mx-auto mt-12 lg:mt-16 max-w-3xl rounded-xl bg-white p-4 shadow-sm sm:p-6" aria-label="Cronograma das fases 1 a 5, de 0 a 5 anos">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-bold">Cronograma</h3>
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
+            <span className="size-2.5 rounded-full bg-red-600" aria-hidden="true" />
+            Próxima
+          </span>
+        </div>
+        <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
+          <span aria-hidden="true" />
+          <div className="relative h-4 text-[9px] font-medium text-slate-500 sm:text-xs">
+            {yearTicks.map((tick, index) => <span
+              key={tick}
+              className="absolute top-0 whitespace-nowrap"
+              style={{
+                left: `${index * 20}%`,
+                transform: index === 0 ? 'none' : index === yearTicks.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)',
+              }}
+            >{tick}</span>)}
+          </div>
+        </div>
+        <div className="mt-2 space-y-2">
+          {timeline.map(phase => <div key={phase.label} className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
+            <span className="text-[10px] font-semibold text-slate-600 sm:text-xs">{phase.label}</span>
+            <div className="relative h-3 overflow-hidden rounded-full bg-slate-50">
+              {yearTicks.map((tick, index) => <span
+                key={tick}
+                className="pointer-events-none absolute inset-y-0 z-0 border-l border-slate-200"
+                style={{ left: `${index * 20}%` }}
+              />)}
+              <span
+                className={`absolute inset-y-0 z-10 rounded-full ${phase.highlighted ? 'bg-red-600' : 'bg-slate-300'}`}
+                style={{ left: `${phase.start / 60 * 100}%`, width: `${(phase.end - phase.start) / 60 * 100}%` }}
+              />
+            </div>
+          </div>)}
         </div>
       </div>
     </div>
