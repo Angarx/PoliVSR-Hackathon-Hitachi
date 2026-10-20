@@ -136,7 +136,7 @@ const [hour, setHour] = useState(0)
         <button type="button" onClick={() => onNavigate('simulator')} className="relative z-0 mx-auto mt-10 overflow-hidden rounded-full bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-[0_0_12px_3px_rgba(230,0,0,0.38)] animate-cta-aurora transition hover:bg-red-700">Acessar Calculadora de OPEX</button>
       </div>
     </section>
-    <section id="about-project" className="relative z-10 -mt-16 rounded-xl bg-white px-6 pt-24 pb-12 shadow-xl">
+    <section id="about-project" className="relative z-10 -mt-16 rounded-xl bg-white px-6 pt-24 pb-4 shadow-xl">
       <div className="mx-auto max-w-5xl">
         <p className="mb-4 text-xs font-bold uppercase tracking-[.25em] text-red-600">O projeto PoliVSR</p>
         <h2 className="text-4xl font-black tracking-tight sm:text-6xl">Da pesquisa aplicada à rede do futuro.</h2>
@@ -215,12 +215,11 @@ function WindingRoadmapSection() {
     }),
   ].join(' ')
 
-  return <section className="relative z-10 bg-gray-50 px-6 py-24 text-slate-900 sm:px-10">
+  return <section className="relative z-10 bg-gray-50 px-6 pt-10 pb-24 text-slate-900 sm:px-10">
     <div className="relative z-10 mx-auto max-w-6xl">
-      <header className="mx-auto max-w-3xl text-center">
-        <p className="text-xs font-bold uppercase tracking-[.25em] text-red-600">Próximos passos</p>
+      <header className="mx-auto max-w-5xl text-left">
         <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Roadmap</h2>
-        <p className="mt-5 text-lg leading-8 text-slate-600">Um caminho progressivo para transformar pesquisa aplicada em decisões mais seguras para a rede.</p>
+        <p className="mt-3 text-xs font-bold uppercase tracking-[.25em] text-red-600">Próximos passos</p>
       </header>
       <div className="relative mx-auto mt-12 max-w-5xl pl-16 lg:pl-0">
         <div className="absolute bottom-6 left-6 top-6 z-0 border-l-[3px] border-dashed border-red-300 lg:hidden" aria-hidden="true" />
