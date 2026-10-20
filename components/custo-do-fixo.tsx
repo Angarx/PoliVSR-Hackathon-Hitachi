@@ -186,6 +186,9 @@ function FanEndLabel({ x, y, index, value, name, color, lastIndex }: any) {
 
 function ScenarioCard({ scenario, active, onSelect }: { scenario: any; active: boolean; onSelect: () => void }) {
   const Icon = scenario.icon
+  const baseLabel = scenario.id === 'urbano'
+    ? 'Base: carga do Nordeste menos geração solar · 230 kV'
+    : scenario.data.base
   const sparkline = useMemo(() => {
     const interval = Math.max(1, Math.ceil(scenario.data.dia.r.length / 24))
     return scenario.data.dia.r.filter((_: number, index: number) => index % interval === 0).map((value: number) => ({ value }))
@@ -201,7 +204,7 @@ function ScenarioCard({ scenario, active, onSelect }: { scenario: any; active: b
       <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${active ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-600'}`}><Icon aria-hidden="true" size={20} /></span>
       <span className="min-w-0">
         <strong className="block text-sm font-bold text-slate-950 sm:text-base">{scenario.data.nome}</strong>
-        <span className="mt-1 block text-xs leading-4 text-slate-500">{scenario.data.base}</span>
+        <span className="mt-1 block text-xs leading-4 text-slate-500">{baseLabel}</span>
       </span>
     </span>
     <span className="h-12 w-[88px] shrink-0 sm:w-32" aria-hidden="true">
@@ -291,6 +294,9 @@ export default function CustoDoFixo() {
   const variant = view.variantes[variantId] || view.variantes.base
   const referenceFixedMi = scenario.preco_fixos / 1e6
   const fixedMi = referenceFixedMi * fixedFactor
+  const fixedBreakerSwap = scenario.oper.anos_ate_troca_fixo >= 30
+    ? 'não troca em 30 anos'
+    : `troca a cada ~${numberText(scenario.oper.anos_ate_troca_fixo)} anos`
   const premium = price / fixedMi - 1
   const priceStep = stepFor(scenario)
   const selectedViewHelp = viewHelp[viewId]
@@ -519,7 +525,11 @@ export default function CustoDoFixo() {
     <div className="mx-auto max-w-7xl">
       <header className="mx-auto mb-8 max-w-6xl text-center">
         <p className="text-xs font-bold uppercase tracking-[.25em] text-red-600">Simulação financeira</p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">O Custo do Fixo: Simulador Estatístico do <span className="whitespace-nowrap">VSR<InfoTip text={`Modelo PoliVSR · ${numberText(model.meta.simulacoes)} simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · ${model.meta.moeda}`} /></span></h1>
+        <h1 className="mx-[-0.5rem] mt-3 font-black tracking-tight text-balance sm:mx-0">
+          <span className="block text-5xl leading-[1.05] sm:text-6xl">O Custo do Fixo</span>
+          <span className="sr-only">: </span>
+          <span className="mt-2 block text-xl font-bold text-slate-600 sm:text-3xl">Simulador Estatístico do <span className="whitespace-nowrap">VSR<InfoTip text={`Modelo PoliVSR · ${numberText(model.meta.simulacoes)} simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · ${model.meta.moeda}`} /></span></span>
+        </h1>
       </header>
 
       <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(280px,.82fr)_minmax(0,1.18fr)]">
@@ -527,7 +537,10 @@ export default function CustoDoFixo() {
           <section aria-labelledby="scenario-title">
             <div className="flex items-center justify-between gap-2">
               <h2 id="scenario-title" className="text-lg font-bold">Cenário operacional</h2>
-              <InfoTip text="Selecione o cenário da sua rede. A curva é a necessidade de reativo manobrável num dia típico do cenário." />
+              <InfoTip items={[
+                { label: '', text: 'Selecione o cenário da sua rede. A curva é a necessidade de reativo manobrável num dia típico do cenário.' },
+                { label: 'Centro Urbano (230 kV)', text: 'O preço do VSR de 230 kV é a estimativa de menor confiança do modelo: vem de contratos europeus de 500 kV escalados por regra. O preço do fixo de 230 kV também é escalado a partir do de 500 kV.' },
+              ]} />
             </div>
             <div className="mt-4 flex flex-col gap-3">
               {scenarioChoices.map(option => <ScenarioCard
@@ -681,7 +694,7 @@ export default function CustoDoFixo() {
               <InfoTip items={[
                 { label: 'Payback', text: paybackNote },
                 { label: 'Manobras evitadas', text: 'por ano, por disjuntor do fixo' },
-                { label: 'Troca do disjuntor', text: `fixo troca a cada ~${numberText(scenario.oper.anos_ate_troca_fixo)} anos; o do VSR não troca em 30` },
+                { label: 'Troca do disjuntor', text: `fixo ${fixedBreakerSwap}; o do VSR não troca em 30` },
                 { label: 'Vão de manobra evitado', text: '1 vão a menos (disjuntor, seccionadoras, obra)' },
               ]} />
             </div>

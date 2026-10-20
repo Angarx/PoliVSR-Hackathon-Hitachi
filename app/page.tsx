@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { ArrowRight, BarChart3, CircleDollarSign, Search, UsersRound } from 'lucide-react'
+import { ArrowRight, BarChart3, Check, CircleDollarSign, Search, Target, UsersRound } from 'lucide-react'
 import { TOTAL_DIA, VERAO } from '@/lib/dados/inicio'
 
 type TabId = 'about' | 'data' | 'simulator'
@@ -101,8 +101,6 @@ function CurveChart({ hour, onChange }: { hour: number; onChange: (hour: number)
 
 const blocks = [
   ['Quem somos', 'Somos o PoliVSR, um núcleo de Inteligência de Rede formado por pesquisadores da Poli-USP, viabilizado por fomento à pesquisa da Hitachi Energy. Atuamos na validação técnica e econômica independente para os novos desafios do Sistema Interligado Nacional (SIN). Com a expansão das linhas e o crescimento das renováveis intermitentes, a demanda flutua drasticamente e a tensão se eleva em cargas leves. O PoliVSR investiga e quantifica em quais cenários a adoção de tecnologias de ajuste contínuo (VSR) traz viabilidade financeira e resiliência à rede, substituindo a rigidez operacional atual.'],
-  ['O que estamos fazendo', 'Estruturamos metodologias e ferramentas de simulação para calcular o impacto financeiro e operativo do Reator de Derivação Variável (VSR) no OPEX das concessionárias. Este site atua como nosso repositório técnico e painel de dados abertos. (Nota de Transparência: Como este é um projeto conceitual do Hackathon Hitachi 2026, os painéis interativos da versão atual utilizam simulações ilustrativas e dados em fase de calibração). Nossa equipe trabalha processando estatísticas reais de operação do ONS e EPE para fundamentar a evolução do sistema.'],
-  ['O que queremos', 'Acreditamos na aliança transparente entre a universidade e a indústria para acelerar a inovação. Queremos atrair concessionárias de transmissão para estudos práticos conjuntos, modelando a redução de custos operacionais e o alívio no desgaste de ativos. Nosso papel acadêmico é fornecer ao planejamento do setor (ONS e EPE) embasamento técnico rigoroso para investigar se a tecnologia VSR é, de fato, a decisão mais eficiente para o Nordeste e outras regiões críticas do Brasil.'],
   ['O que é o VSR e por que investigamos esta alternativa?', 'Hoje, a rede utiliza amplamente reatores fixos que operam em estados binários (ligado/desligado). Para controlar a tensão em cenários voláteis, realizam-se manobras de disjuntor que, ao longo do tempo, geram desgaste mecânico e elétrico. O Variable Shunt Reactor (VSR) atua de forma dinâmica lenta, semelhante a um dimmer. Equipado com um comutador sob carga (OLTC), ele altera o número de espiras ativas em pequenos degraus automáticos, ajustando a absorção de potência reativa sem desconectar o ativo. Nosso estudo propõe avaliar como essa estabilidade se converte em economia frente a outras alternativas.'],
 ] as const
 
@@ -117,7 +115,160 @@ const [hour, setHour] = useState(0)
     const now = new Date(); setHour(now.getHours() + (now.getMinutes() >= 30 ? 0.5 : 0))
   }, [])
   const maneuvers = Math.round(cumulativeOperations[Math.round(hour * 2)])
-  return <><section className="bg-slate-950 px-5 pb-24 pt-32 text-left text-white sm:px-8 sm:pt-40"><div className="mx-auto flex max-w-6xl flex-col items-start"><p className="mb-5 self-center text-center text-xs font-bold uppercase tracking-[.3em] text-red-400">PoliVSR · pesquisa aplicada</p><p className="text-2xl font-semibold text-white sm:text-3xl">{heroLead(hour)}</p><h1 className="my-2 text-7xl font-black leading-none tracking-[-.07em] text-red-600 sm:text-8xl lg:text-[9rem]">{maneuvers} manobras</h1><p className="text-2xl font-semibold text-white sm:text-3xl">de disjuntor para ligar e desligar reatores.</p><p className="mt-3 max-w-xl text-base text-slate-300 sm:text-lg">{heroNarrative(hour)}</p><div className="mt-14 w-full"><CurveChart hour={hour} onChange={setHour} /></div><p className="mt-8 text-sm text-slate-400 sm:text-base">Arraste sobre a curva para acompanhar a operação ao longo do dia.</p><p className="mt-2 max-w-3xl text-xs leading-5 text-slate-400">{heroEstimateNote}</p><button type="button" onClick={() => onNavigate('simulator')} className="relative z-0 mx-auto mt-10 overflow-hidden rounded-full bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-[0_0_12px_3px_rgba(230,0,0,0.38)] animate-cta-aurora transition hover:bg-red-700">Acessar Calculadora de OPEX</button></div></section><section id="about-project" className="relative z-10 -mt-16 rounded-xl bg-white px-6 py-24 shadow-xl"><div className="mx-auto max-w-5xl"><p className="mb-4 text-xs font-bold uppercase tracking-[.25em] text-red-600">O projeto PoliVSR</p><h2 className="text-4xl font-black tracking-tight sm:text-6xl">Da pesquisa aplicada à rede do futuro.</h2><div className="mt-16 divide-y divide-slate-200">{blocks.map(([title, text], index) => <article key={title} className={`grid gap-6 py-12 md:grid-cols-[.8fr_1.4fr] ${index % 2 ? 'bg-slate-50' : 'bg-white'}`}><h3 className="text-2xl font-bold">{title}</h3><p className="text-lg leading-8 text-slate-600">{text}</p></article>)}</div></div></section><PageEndNavigation activeTab="about" onNavigate={onNavigate} /><ContactSection /></>
+  return <><section className="bg-slate-950 px-5 pb-24 pt-32 text-left text-white sm:px-8 sm:pt-40"><div className="mx-auto flex max-w-6xl flex-col items-start"><p className="mb-5 self-center text-center text-xs font-bold uppercase tracking-[.3em] text-red-400">PoliVSR · pesquisa aplicada</p><p className="text-2xl font-semibold text-white sm:text-3xl">{heroLead(hour)}</p><h1 className="my-2 text-7xl font-black leading-none tracking-[-.07em] text-red-600 sm:text-8xl lg:text-[9rem]">{maneuvers} manobras</h1><p className="text-2xl font-semibold text-white sm:text-3xl">de disjuntor para ligar e desligar reatores.</p><p className="mt-3 max-w-xl text-base text-slate-300 sm:text-lg">{heroNarrative(hour)}</p><div className="mt-14 w-full"><CurveChart hour={hour} onChange={setHour} /></div><p className="mt-8 text-sm text-slate-400 sm:text-base">Arraste sobre a curva para acompanhar a operação ao longo do dia.</p><p className="mt-2 max-w-3xl text-xs leading-5 text-slate-400">{heroEstimateNote}</p><button type="button" onClick={() => onNavigate('simulator')} className="relative z-0 mx-auto mt-10 overflow-hidden rounded-full bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-[0_0_12px_3px_rgba(230,0,0,0.38)] animate-cta-aurora transition hover:bg-red-700">Acessar Calculadora de OPEX</button></div></section><section id="about-project" className="relative z-10 -mt-16 rounded-xl bg-white px-6 py-24 shadow-xl"><div className="mx-auto max-w-5xl"><p className="mb-4 text-xs font-bold uppercase tracking-[.25em] text-red-600">O projeto PoliVSR</p><h2 className="text-4xl font-black tracking-tight sm:text-6xl">Da pesquisa aplicada à rede do futuro.</h2><div className="mt-16 divide-y divide-slate-200">{blocks.map(([title, text], index) => <article key={title} className={`grid gap-6 py-12 md:grid-cols-[.8fr_1.4fr] ${index % 2 ? 'bg-slate-50' : 'bg-white'}`}><h3 className="text-2xl font-bold">{title}</h3><p className="text-lg leading-8 text-slate-600">{text}</p></article>)}</div></div></section><WindingRoadmapSection /><PageEndNavigation activeTab="about" onNavigate={onNavigate} /><ContactSection /></>
+}
+
+function WindingRoadmapSection() {
+  const phases = [
+    {
+      number: 0,
+      status: 'Concluída',
+      title: 'Base e modelo',
+      description: 'Base de dados com 92 arquivos públicos do ONS, ANEEL e BC; modelo físico e financeiro (Monte Carlo). Calculadora “O Custo do Fixo” criada no Hackathon Hitachi Energy 2026.',
+      result: 'Comparação entre VSR e reator fixo com dados públicos.',
+    },
+    {
+      number: 1,
+      status: 'Próxima (previsão de 0 a 6 meses)',
+      title: 'Mapa de oportunidades',
+      description: 'Aplicar a calculadora aos reatores novos previstos nos planos do ONS (PAR/PEL) e nos próximos leilões de transmissão.',
+      result: 'Lista das subestações onde um VSR tende a sair mais barato.',
+    },
+    {
+      number: 2,
+      status: 'Planejada (previsão de cerca de 1 ano)',
+      title: 'Medição com transmissoras',
+      description: 'Projeto de P&D com uma transmissora (programa ANEEL), usando dados reais de manobras, desgaste de disjuntores e histórico de falhas.',
+      result: 'Calculadora calibrada com a operação real e plano de troca preventiva.',
+    },
+    {
+      number: 3,
+      status: 'Planejada',
+      title: 'Estudo de caso real',
+      description: 'Escolher uma ou duas subestações do plano de expansão da transmissora parceira e comparar em detalhe o VSR e o reator fixo no local.',
+      result: 'Decisão técnica e econômica para uma obra concreta.',
+    },
+    {
+      number: 4,
+      status: 'Planejada (opcional)',
+      title: 'Piloto em campo',
+      description: 'Instalar um VSR em uma dessas subestações e acompanhar o funcionamento por um a dois anos.',
+      result: 'Os primeiros dados de VSR em operação na rede brasileira.',
+    },
+    {
+      number: 5,
+      status: 'Planejada',
+      title: 'Regras e referências de preço',
+      description: 'Com os resultados, propor a inclusão do VSR na tabela de preços de referência da ANEEL e nos estudos de leilões.',
+      result: 'Permitir que transmissoras escolham o VSR quando for a opção mais barata.',
+    },
+  ]
+  const timeline = [
+    { label: 'F1 · 6 meses', start: 0, end: 6, highlighted: true },
+    { label: 'F2 · ~1 ano', start: 6, end: 18, highlighted: false },
+    { label: 'F3 · 6 meses', start: 18, end: 24, highlighted: false },
+    { label: 'F4 · 2 anos', start: 24, end: 48, highlighted: false },
+    { label: 'F5 · 1 ano', start: 48, end: 60, highlighted: false },
+  ]
+  const yearTicks = ['0', '1 ano', '2 anos', '3 anos', '4 anos', '5 anos']
+  const rowHeight = 300
+  const roadmapPath = [
+    `M500 ${rowHeight / 2}`,
+    ...phases.slice(0, -1).map((_, index) => {
+      const side = index % 2 === 0 ? -1 : 1
+      const y = rowHeight * index + rowHeight / 2
+      return `C ${500 + side * 70} ${y + rowHeight * 0.33} ${500 + side * 70} ${y + rowHeight * 0.67} 500 ${rowHeight * (index + 1) + rowHeight / 2}`
+    }),
+  ].join(' ')
+
+  return <section className="relative z-10 bg-gray-50 px-6 py-24 text-slate-900 sm:px-10">
+    <div className="relative z-10 mx-auto max-w-6xl">
+      <header className="mx-auto max-w-3xl text-center">
+        <p className="text-xs font-bold uppercase tracking-[.25em] text-red-600">Próximos passos</p>
+        <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Roadmap</h2>
+        <p className="mt-5 text-lg leading-8 text-slate-600">Um caminho progressivo para transformar pesquisa aplicada em decisões mais seguras para a rede.</p>
+      </header>
+      <div className="mx-auto mt-8 max-w-3xl rounded-xl bg-white p-4 shadow-sm sm:mt-10 sm:p-6" aria-label="Cronograma das fases 1 a 5, de 0 a 5 anos">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-bold">Cronograma</h3>
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
+            <span className="size-2.5 rounded-full bg-red-600" aria-hidden="true" />
+            Próxima
+          </span>
+        </div>
+        <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
+          <span aria-hidden="true" />
+          <div className="relative h-4 text-[9px] font-medium text-slate-500 sm:text-xs">
+            {yearTicks.map((tick, index) => <span
+              key={tick}
+              className="absolute top-0 whitespace-nowrap"
+              style={{
+                left: `${index * 20}%`,
+                transform: index === 0 ? 'none' : index === yearTicks.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)',
+              }}
+            >{tick}</span>)}
+          </div>
+        </div>
+        <div className="mt-2 space-y-2">
+          {timeline.map(phase => <div key={phase.label} className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
+            <span className="text-[10px] font-semibold text-slate-600 sm:text-xs">{phase.label}</span>
+            <div className="relative h-3 overflow-hidden rounded-full bg-slate-50">
+              {yearTicks.map((tick, index) => <span
+                key={tick}
+                className="pointer-events-none absolute inset-y-0 z-0 border-l border-slate-200"
+                style={{ left: `${index * 20}%` }}
+              />)}
+              <span
+                className={`absolute inset-y-0 z-10 rounded-full ${phase.highlighted ? 'bg-red-600' : 'bg-slate-300'}`}
+                style={{ left: `${phase.start / 60 * 100}%`, width: `${(phase.end - phase.start) / 60 * 100}%` }}
+              />
+            </div>
+          </div>)}
+        </div>
+      </div>
+      <div className="relative mx-auto mt-12 max-w-5xl pl-16 lg:pl-0">
+        <div className="absolute bottom-6 left-6 top-6 z-0 border-l-[3px] border-dashed border-red-300 lg:hidden" aria-hidden="true" />
+        <svg className="pointer-events-none absolute inset-x-0 top-0 hidden h-full w-full overflow-visible lg:block" viewBox={`0 0 1000 ${phases.length * rowHeight}`} preserveAspectRatio="none" aria-hidden="true">
+          <path d={roadmapPath} fill="none" stroke="#e60000" strokeDasharray="2 14" strokeLinecap="round" strokeWidth="6" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <div className="relative space-y-6 lg:space-y-0">
+          {phases.map(phase => {
+            const completed = phase.number === 0
+            const next = phase.number === 1
+            const right = phase.number % 2 === 0
+            const badgeClass = completed
+              ? 'bg-slate-800 text-white'
+              : phase.number === 1
+                ? 'bg-red-50 text-red-700'
+                : 'bg-slate-100 text-slate-900'
+            const nodeClass = completed
+              ? 'bg-red-600 text-white'
+              : next
+                ? 'bg-white text-red-600 ring-4 ring-red-200'
+                : 'bg-white text-slate-500 ring-2 ring-slate-200'
+            return <article key={phase.number} className={`relative -ml-16 flex min-h-0 items-start pl-16 lg:ml-0 lg:h-[300px] lg:items-center lg:pl-0 ${right ? 'lg:justify-end' : 'lg:justify-start'}`}>
+              <div className="absolute left-0 top-5 z-20 size-12 lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2" aria-hidden="true">
+                {next && <span className="absolute inset-0 rounded-full bg-red-200/70 animate-ping motion-reduce:animate-none" />}
+                <span className={`relative z-10 grid size-12 place-items-center rounded-full border-4 border-gray-50 text-lg font-black shadow-md ${nodeClass}`}>
+                  {completed ? <Check className="size-5 stroke-[3]" /> : phase.number}
+                </span>
+              </div>
+              <div className={`relative z-10 w-full rounded-2xl bg-white p-6 shadow-lg ring-1 transition duration-200 lg:w-[42%] lg:hover:-translate-y-1 lg:hover:shadow-xl ${next ? 'ring-red-100' : 'ring-slate-100'}`}>
+                <div className={`mb-4 inline-flex rounded-full px-3 py-1 text-xs font-bold ${badgeClass}`}>{phase.status}</div>
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-red-600">Fase {phase.number}</p>
+                <h3 className="mt-1 text-xl font-bold sm:text-2xl">{phase.title}</h3>
+                <p className="mt-3 leading-7 text-slate-700">{phase.description}</p>
+                <footer className="mt-5 flex items-start gap-2 border-t border-slate-100 pt-4 text-sm font-semibold leading-6 text-slate-900">
+                  <Target className="mt-0.5 size-4 shrink-0 text-red-600" aria-hidden="true" />
+                  <span><span className="text-red-600">Resultado:</span> {phase.result}</span>
+                </footer>
+              </div>
+            </article>
+          })}
+        </div>
+      </div>
+    </div>
+  </section>
 }
 
 function ContactSection() { return <section className="bg-gray-950 px-6 py-24 text-white"><div className="mx-auto max-w-5xl"><h2 className="mb-4 text-4xl font-bold">Traga a estabilidade do VSR para a sua concessão.</h2><p className="mb-12 max-w-3xl text-lg text-gray-400">O grupo de pesquisa PoliVSR atua na modelagem técnica e comercial de Variable Shunt Reactors no SIN. Se a sua transmissora enfrenta elevados custos com desgaste mecânico e sobretensões na carga leve, apoie a criação deste laboratório. Mapeamos, de forma acadêmica, a viabilidade operacional de mitigar o OPEX invisível na sua concessão.</p><div className="grid grid-cols-1 gap-12 md:grid-cols-2"><div className="flex flex-col gap-6 text-gray-300"><p><strong className="text-white">Projeto Conceitual:</strong> Hackathon Hitachi Energy 2026</p><p><strong className="text-white">Repositório do Projeto / Equipe:</strong> <a href="https://github.com/JPauloSar/PoliVSR-Hackathon-Hitachi" target="_blank" rel="noopener noreferrer" className="break-all underline underline-offset-4 hover:text-white">github.com/JPauloSar/PoliVSR-Hackathon-Hitachi</a></p><p><strong className="text-white">Email:</strong> pesquisa@polivsr.usp.br</p><p><strong className="text-white">Ambiente de Pesquisa:</strong> Poli-USP, São Paulo - SP</p><p><strong className="text-white">Apoio e Fomento:</strong> Hitachi Energy HUB, Guarulhos - SP</p></div><form className="flex flex-col gap-4"><input className="rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="Nome completo" /><input className="rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="Empresa (Concessionária / Agente)" /><input className="rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="E-mail corporativo" type="email" /><textarea className="h-32 rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="Como as sobretensões afetam o OPEX da sua operação hoje?" /><button type="button" className="rounded bg-red-600 p-4 text-center font-bold hover:bg-red-700">Solicitar Estudo de Viabilidade</button></form></div></div></section> }
