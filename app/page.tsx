@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { ArrowRight, BarChart3, CircleDollarSign, Search, UsersRound } from 'lucide-react'
+import { ArrowRight, BarChart3, Check, CircleDollarSign, Search, Target, UsersRound } from 'lucide-react'
 import { TOTAL_DIA, VERAO } from '@/lib/dados/inicio'
 
 type TabId = 'about' | 'data' | 'simulator'
@@ -171,16 +171,15 @@ function WindingRoadmapSection() {
     { label: 'F5 · 1 ano', start: 48, end: 60, highlighted: false },
   ]
   const yearTicks = ['0', '1 ano', '2 anos', '3 anos', '4 anos', '5 anos']
-  const rowHeight = 560
+  const rowHeight = 300
   const roadmapPath = [
     `M500 ${rowHeight / 2}`,
     ...phases.slice(0, -1).map((_, index) => {
       const side = index % 2 === 0 ? -1 : 1
       const y = rowHeight * index + rowHeight / 2
-      return `C ${500 + side * 260} ${y + rowHeight * 0.33} ${500 + side * 260} ${y + rowHeight * 0.67} 500 ${rowHeight * (index + 1) + rowHeight / 2}`
+      return `C ${500 + side * 70} ${y + rowHeight * 0.33} ${500 + side * 70} ${y + rowHeight * 0.67} 500 ${rowHeight * (index + 1) + rowHeight / 2}`
     }),
   ].join(' ')
-  const mobileRoadmapPath = 'M500 50 C720 150 720 230 500 310 S280 470 500 570 S720 730 500 830 S280 990 500 1090 S720 1250 500 1450'
 
   return <section className="relative z-10 bg-gray-50 px-6 py-24 text-slate-900 sm:px-10">
     <div className="relative z-10 mx-auto max-w-6xl">
@@ -190,6 +189,13 @@ function WindingRoadmapSection() {
         <p className="mt-5 text-lg leading-8 text-slate-600">Um caminho progressivo para transformar pesquisa aplicada em decisões mais seguras para a rede.</p>
       </header>
       <div className="mx-auto mt-8 max-w-3xl rounded-xl bg-white p-4 shadow-sm sm:mt-10 sm:p-6" aria-label="Cronograma das fases 1 a 5, de 0 a 5 anos">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-bold">Cronograma</h3>
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
+            <span className="size-2.5 rounded-full bg-red-600" aria-hidden="true" />
+            Próxima
+          </span>
+        </div>
         <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
           <span aria-hidden="true" />
           <div className="relative h-4 text-[9px] font-medium text-slate-500 sm:text-xs">
@@ -206,39 +212,57 @@ function WindingRoadmapSection() {
         <div className="mt-2 space-y-2">
           {timeline.map(phase => <div key={phase.label} className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-x-2">
             <span className="text-[10px] font-semibold text-slate-600 sm:text-xs">{phase.label}</span>
-            <div className="relative h-2.5 rounded-full bg-slate-100">
+            <div className="relative h-3 overflow-hidden rounded-full bg-slate-50">
+              {yearTicks.map((tick, index) => <span
+                key={tick}
+                className="pointer-events-none absolute inset-y-0 z-0 border-l border-slate-200"
+                style={{ left: `${index * 20}%` }}
+              />)}
               <span
-                className={`absolute inset-y-0 rounded-full ${phase.highlighted ? 'bg-red-600' : 'bg-slate-400'}`}
+                className={`absolute inset-y-0 z-10 rounded-full ${phase.highlighted ? 'bg-red-600' : 'bg-slate-300'}`}
                 style={{ left: `${phase.start / 60 * 100}%`, width: `${(phase.end - phase.start) / 60 * 100}%` }}
               />
             </div>
           </div>)}
         </div>
       </div>
-      <div className="relative mx-auto mt-12 max-w-5xl sm:mt-16">
-        <svg className="pointer-events-none absolute inset-x-0 top-0 hidden h-full w-full overflow-visible sm:block" viewBox={`0 0 1000 ${phases.length * rowHeight}`} preserveAspectRatio="none" aria-hidden="true">
-          <path d={roadmapPath} fill="none" stroke="#e60000" strokeDasharray="10 14" strokeLinecap="round" strokeWidth="6" vectorEffect="non-scaling-stroke" />
+      <div className="relative mx-auto mt-12 max-w-5xl pl-16 lg:pl-0">
+        <div className="absolute bottom-6 left-6 top-6 z-0 border-l-[3px] border-dashed border-red-300 lg:hidden" aria-hidden="true" />
+        <svg className="pointer-events-none absolute inset-x-0 top-0 hidden h-full w-full overflow-visible lg:block" viewBox={`0 0 1000 ${phases.length * rowHeight}`} preserveAspectRatio="none" aria-hidden="true">
+          <path d={roadmapPath} fill="none" stroke="#e60000" strokeDasharray="2 14" strokeLinecap="round" strokeWidth="6" vectorEffect="non-scaling-stroke" />
         </svg>
-        <svg className="pointer-events-none absolute inset-x-0 top-0 block h-full w-full overflow-visible opacity-40 sm:hidden" viewBox="0 0 1000 1500" preserveAspectRatio="none" aria-hidden="true">
-          <path d={mobileRoadmapPath} fill="none" stroke="#e60000" strokeDasharray="10 14" strokeLinecap="round" strokeWidth="6" vectorEffect="non-scaling-stroke" />
-        </svg>
-        <div className="relative space-y-8 sm:space-y-0">
+        <div className="relative space-y-6 lg:space-y-0">
           {phases.map(phase => {
             const completed = phase.number === 0
+            const next = phase.number === 1
             const right = phase.number % 2 === 0
             const badgeClass = completed
               ? 'bg-slate-800 text-white'
               : phase.number === 1
                 ? 'bg-red-50 text-red-700'
                 : 'bg-slate-100 text-slate-900'
-            return <article key={phase.number} className={`relative flex min-h-0 items-center sm:h-[560px] ${right ? 'sm:justify-end' : 'sm:justify-start'}`}>
-              <div className={`relative z-10 w-full rounded-2xl bg-white p-6 shadow-lg sm:w-[42%] ${completed ? 'border border-red-100' : 'border border-slate-100'}`}>
-                <div className={`mb-4 inline-flex rounded-full px-3 py-1 text-xs font-bold ${badgeClass}`}>{phase.status}</div>
-                <h3 className="text-2xl font-bold">Fase {phase.number} · {phase.title}</h3>
-                <p className="mt-3 leading-7 text-slate-700">{phase.description}</p>
-                <footer className="mt-5 border-t border-slate-100 pt-4 text-sm font-semibold leading-6 text-slate-900"><span className="text-red-600">Resultado:</span> {phase.result}</footer>
+            const nodeClass = completed
+              ? 'bg-red-600 text-white'
+              : next
+                ? 'bg-white text-red-600 ring-4 ring-red-200'
+                : 'bg-white text-slate-500 ring-2 ring-slate-200'
+            return <article key={phase.number} className={`relative -ml-16 flex min-h-0 items-start pl-16 lg:ml-0 lg:h-[300px] lg:items-center lg:pl-0 ${right ? 'lg:justify-end' : 'lg:justify-start'}`}>
+              <div className="absolute left-0 top-5 z-20 size-12 lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2" aria-hidden="true">
+                {next && <span className="absolute inset-0 rounded-full bg-red-200/70 animate-ping motion-reduce:animate-none" />}
+                <span className={`relative z-10 grid size-12 place-items-center rounded-full border-4 border-gray-50 text-lg font-black shadow-md ${nodeClass}`}>
+                  {completed ? <Check className="size-5 stroke-[3]" /> : phase.number}
+                </span>
               </div>
-              <span className={`absolute left-4 top-6 z-20 size-5 rounded-full border-4 border-gray-50 sm:left-1/2 sm:top-1/2 sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2 ${completed ? 'bg-red-600' : 'bg-slate-400'}`} />
+              <div className={`relative z-10 w-full rounded-2xl bg-white p-6 shadow-lg ring-1 transition duration-200 lg:w-[42%] lg:hover:-translate-y-1 lg:hover:shadow-xl ${next ? 'ring-red-100' : 'ring-slate-100'}`}>
+                <div className={`mb-4 inline-flex rounded-full px-3 py-1 text-xs font-bold ${badgeClass}`}>{phase.status}</div>
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-red-600">Fase {phase.number}</p>
+                <h3 className="mt-1 text-xl font-bold sm:text-2xl">{phase.title}</h3>
+                <p className="mt-3 leading-7 text-slate-700">{phase.description}</p>
+                <footer className="mt-5 flex items-start gap-2 border-t border-slate-100 pt-4 text-sm font-semibold leading-6 text-slate-900">
+                  <Target className="mt-0.5 size-4 shrink-0 text-red-600" aria-hidden="true" />
+                  <span><span className="text-red-600">Resultado:</span> {phase.result}</span>
+                </footer>
+              </div>
             </article>
           })}
         </div>
