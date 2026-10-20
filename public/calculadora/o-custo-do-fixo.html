@@ -76,7 +76,7 @@ p { margin: 0; }
 .calc { background: var(--page); padding-top: calc(112px + env(safe-area-inset-top, 0px)); padding-bottom: 64px; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
 @media (min-width: 640px) { .calc { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
 .wrap { max-width: 72rem; margin: 0 auto; }
-.page-head { max-width: 48rem; }
+.page-head { max-width: 48rem; margin: 0 auto; text-align: center; }
 .eyebrow { font-size: 12px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: .25em; color: var(--red); }
 .page-head .eyebrow { text-align: center; }
 .page-head h1 { margin-top: 12px; font-size: 2.25rem; line-height: 1.1; font-weight: 900; letter-spacing: -0.025em; }
@@ -306,7 +306,7 @@ html.embed .calc { padding-top: 40px; }
   <div class="wrap">
     <header class="page-head">
       <p class="eyebrow">Simulação financeira</p>
-      <h1>O Custo do Fixo: Simulador Estocástico do VSR</h1>
+      <h1>O Custo do Fixo: Simulador Estatístico do VSR</h1>
       <p class="page-sub" id="page-sub">Modelo PoliVSR · 4.000 simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · R$ de set/2026</p>
     </header>
 
@@ -376,6 +376,12 @@ html.embed .calc { padding-top: 40px; }
           </article>
         </section>
 
+        <a class="mc-link" href="monte-carlo.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/><circle cx="16" cy="8" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="8" cy="16" r="1.2" fill="currentColor"/><circle cx="16" cy="16" r="1.2" fill="currentColor"/></svg>
+          <span><strong>Como funcionam as 4.000 simulações</strong><small>O que é sorteado em cada uma, com as faixas e as fontes</small></span>
+          <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+
         <section aria-labelledby="impact-title">
           <div class="ttl"><h2 id="impact-title" class="h2-lg">Impacto Operacional e Vida Útil</h2><button type="button" class="info-btn" aria-expanded="false" aria-controls="info-impacto" aria-label="Como ler os indicadores"><svg><use href="#i-info"/></svg></button></div>
           <p class="info" id="info-impacto" hidden></p>
@@ -444,11 +450,6 @@ html.embed .calc { padding-top: 40px; }
             <div class="casc" id="casc"></div>
           </div>
         </section>
-        <a class="mc-link" href="monte-carlo.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/><circle cx="16" cy="8" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="8" cy="16" r="1.2" fill="currentColor"/><circle cx="16" cy="16" r="1.2" fill="currentColor"/></svg>
-          <span><strong>Como funcionam as 4.000 simulações</strong><small>O que é sorteado em cada uma, com as faixas e as fontes</small></span>
-          <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-        </a>
       </div>
     </div>
   </div>
