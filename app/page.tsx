@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { ArrowRight, BarChart3, Check, CircleDollarSign, Search, Target, UsersRound } from 'lucide-react'
+import { ArrowRight, BarChart3, Check, CheckCircle2, CircleDollarSign, Search, Target, UsersRound } from 'lucide-react'
 import { TOTAL_DIA, VERAO } from '@/lib/dados/inicio'
 
 type TabId = 'about' | 'data' | 'simulator'
@@ -311,11 +311,47 @@ const CONTATO_EMAIL = 'pesquisa@polivsr.usp.br'
 const CONTATO_ASSUNTO = 'PoliVSR – estudo de caso'
 
 function ContactSection() {
+  const [sent, setSent] = useState(false)
+  const timerRef = useRef<number | null>(null)
+
+  useEffect(() => () => {
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+  }, [])
+
   return <section className="bg-gray-950 px-6 py-24 text-white">
     <div className="mx-auto max-w-5xl">
       <h2 className="mb-4 text-4xl font-bold">Vamos estudar o VSR na sua concessão</h2>
-      <p className="mb-10 max-w-3xl text-lg text-gray-400">Se a sua transmissora vai instalar reatores de derivação, comparamos o VSR e os reatores fixos com os dados da sua subestação. Um VSR pode substituir dois bancos fixos e economizar um vão de manobra. Entre em contato para estudarmos o seu caso.</p>
-      <a href={`mailto:${CONTATO_EMAIL}?subject=${encodeURIComponent(CONTATO_ASSUNTO)}`} className="inline-block rounded bg-red-600 px-8 py-4 text-center font-bold text-white hover:bg-red-700">Quero estudar o meu caso</a>
+      <p className="mb-8 max-w-3xl text-lg text-gray-400">Se a sua transmissora vai instalar reatores de derivação, comparamos o VSR e os reatores fixos com os dados da sua subestação. Um VSR pode substituir dois bancos fixos e economizar um vão de manobra. Entre em contato para estudarmos o seu caso.</p>
+      <a href={`mailto:${CONTATO_EMAIL}?subject=${encodeURIComponent(CONTATO_ASSUNTO)}`} className="mb-12 inline-block rounded bg-red-600 px-8 py-4 text-center font-bold text-white hover:bg-red-700">Quero estudar o meu caso</a>
+      <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+        <div className="flex flex-col gap-6 text-gray-300">
+          <p><strong className="text-white">Projeto Conceitual:</strong> Hackathon Hitachi Energy 2026</p>
+          <p><strong className="text-white">Repositório do Projeto / Equipe:</strong> <a href="https://github.com/JPauloSar/PoliVSR-Hackathon-Hitachi" target="_blank" rel="noopener noreferrer" className="break-all underline underline-offset-4 hover:text-white">github.com/JPauloSar/PoliVSR-Hackathon-Hitachi</a></p>
+          <p><strong className="text-white">Email:</strong> {CONTATO_EMAIL}</p>
+          <p><strong className="text-white">Ambiente de Pesquisa:</strong> Poli-USP, São Paulo - SP</p>
+          <p><strong className="text-white">Apoio e Fomento:</strong> Hitachi Energy HUB, Guarulhos - SP</p>
+        </div>
+        <form className="flex flex-col gap-4" onSubmit={event => {
+          event.preventDefault()
+          const form = event.currentTarget
+          form.reset()
+          if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+          setSent(true)
+          timerRef.current = window.setTimeout(() => {
+            setSent(false)
+            timerRef.current = null
+          }, 5000)
+        }}>
+          <input className="rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="Nome completo" name="nome" aria-label="Nome completo" required />
+          <input className="rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="Empresa (Concessionária / Agente)" name="empresa" aria-label="Empresa (Concessionária / Agente)" required />
+          <input className="rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="E-mail corporativo" name="email" aria-label="E-mail corporativo" type="email" required />
+          <textarea className="h-32 rounded border border-gray-700 bg-gray-900 p-3 text-white" placeholder="Como as sobretensões afetam o OPEX da sua operação hoje?" name="mensagem" aria-label="Como as sobretensões afetam o OPEX da sua operação hoje?" required />
+          <button type="submit" className="rounded bg-red-600 p-4 text-center font-bold hover:bg-red-700">Solicitar Estudo de Viabilidade</button>
+          <p role="status" aria-live="polite" className={sent ? 'flex items-center gap-2 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm font-semibold text-emerald-300' : 'sr-only'}>
+            {sent && <><CheckCircle2 aria-hidden="true" size={18} /><span>Envio confirmado. Obrigado pelo contato!</span></>}
+          </p>
+        </form>
+      </div>
     </div>
   </section>
 }
