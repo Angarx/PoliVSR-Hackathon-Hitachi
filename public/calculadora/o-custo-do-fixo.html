@@ -186,14 +186,14 @@ select { margin-top: 10px; width: 100%; padding: 10px 12px; border: 1px solid va
 .tabbar [role="tab"][aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(2,6,24,.14); }
 @media (max-width: 480px) { .tabbar [role="tab"] { padding: 8px 10px; font-size: 14px; } }
 .pane[hidden] { display: none; }
-.mc-link { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface);
-  text-decoration: none; color: var(--ink); box-shadow: 0 1px 2px rgba(2,6,24,.05); }
-.mc-link:hover { border-color: var(--faint); }
-.mc-link svg { width: 28px; height: 28px; flex-shrink: 0; color: var(--red); }
-.mc-link svg.arr { width: 20px; height: 20px; margin-left: auto; color: var(--muted); }
+.mc-link { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 12px; border: 1px solid var(--red); background: var(--red);
+  text-decoration: none; color: #fff; box-shadow: 0 1px 2px rgba(2,6,24,.05); }
+.mc-link:hover { background: var(--red-hover); border-color: var(--red-hover); }
+.mc-link svg { width: 28px; height: 28px; flex-shrink: 0; color: #fff; }
+.mc-link svg.arr { width: 20px; height: 20px; margin-left: auto; color: rgba(255,255,255,.85); }
 .mc-link span { display: flex; flex-direction: column; min-width: 0; }
 .mc-link strong { font-size: 15px; line-height: 22px; }
-.mc-link small { font-size: 13px; line-height: 19px; color: var(--muted); }
+.mc-link small { font-size: 13px; line-height: 19px; color: rgba(255,255,255,.85); }
 .ttl { display: flex; align-items: center; gap: 10px; }
 .info-btn { width: 28px; height: 28px; flex-shrink: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
 .info-btn:hover, .info-btn[aria-expanded="true"] { color: var(--ink); background: var(--line-2); }
@@ -247,6 +247,7 @@ td.df { font-weight: 700; color: var(--ink); }
 @media (min-width: 640px) { .tech { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
 .tech .wrap { display: flex; flex-direction: column; gap: 20px; }
 .tech p { font-size: 14px; line-height: 24px; color: var(--text-2); max-width: 70ch; }
+.tech .wrap > p { margin-inline: auto; text-align: center; }
 .btn-out { width: 100%; padding: 12px 16px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #cad5e2; border-radius: 8px;
   font-size: 14px; font-weight: 600; color: var(--ink); background: transparent; }
 .btn-out:hover { background: var(--page); }
@@ -291,12 +292,12 @@ html.embed .calc { padding-top: 40px; }
     <nav class="nav-desk" aria-label="Navegação principal">
       <a class="nav-pill" href="https://polivsr.vercel.app/" target="_blank" rel="noopener"><svg><use href="#i-users"/></svg>Quem Somos</a>
       <a class="nav-pill" href="https://polivsr.vercel.app/" target="_blank" rel="noopener"><svg><use href="#i-chart"/></svg>Pesquisas e Dados</a>
-      <a class="nav-pill cta" href="#calculadora" aria-current="page"><svg><use href="#i-dollar"/></svg>O Preço do Fixo</a>
+      <a class="nav-pill cta" href="#calculadora" aria-current="page"><svg><use href="#i-dollar"/></svg>O Custo do Fixo</a>
     </nav>
     <nav class="nav-mob" aria-label="Navegação principal mobile">
       <a class="nav-ico" href="https://polivsr.vercel.app/" target="_blank" rel="noopener" aria-label="Quem Somos" title="Quem Somos"><svg><use href="#i-users"/></svg></a>
       <a class="nav-ico" href="https://polivsr.vercel.app/" target="_blank" rel="noopener" aria-label="Pesquisas e Dados" title="Pesquisas e Dados"><svg><use href="#i-chart"/></svg></a>
-      <a class="nav-ico cta" href="#calculadora" aria-label="O Preço do Fixo" title="O Preço do Fixo" aria-current="page"><svg><use href="#i-dollar"/></svg></a>
+      <a class="nav-ico cta" href="#calculadora" aria-label="O Custo do Fixo" title="O Custo do Fixo" aria-current="page"><svg><use href="#i-dollar"/></svg></a>
     </nav>
   </div>
 </header>
@@ -306,7 +307,7 @@ html.embed .calc { padding-top: 40px; }
   <div class="wrap">
     <header class="page-head">
       <p class="eyebrow">Simulação financeira</p>
-      <h1>O Custo do Fixo: Simulador Estatístico do VSR</h1>
+      <h1>O Custo do Fixo&nbsp;- Simulador Estatístico do VSR</h1>
       <p class="page-sub" id="page-sub">Modelo PoliVSR · 4.000 simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · R$ de set/2026</p>
     </header>
 
