@@ -82,6 +82,15 @@ p { margin: 0; }
 .page-head h1 { margin-top: 12px; font-size: 2.25rem; line-height: 1.1; font-weight: 900; letter-spacing: -0.025em; }
 @media (min-width: 640px) { .page-head h1 { font-size: 3.75rem; line-height: 1; } }
 .page-sub { margin-top: 16px; font-size: 14px; line-height: 22px; color: var(--muted); }
+.page-head h1 .h1-main { display: block; font-size: clamp(2.25rem, 11vw, 3rem); line-height: 1.05; }
+@media (min-width: 640px) { .page-head h1 .h1-main { font-size: 3.75rem; } }
+.page-head h1 .h1-sub { display: block; margin-top: 8px; font-size: 1.25rem; line-height: 1.75rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text-2); }
+@media (min-width: 640px) { .page-head h1 .h1-sub { font-size: 1.875rem; line-height: 2.25rem; } }
+.page-head .h1-info { margin-left: 4px; vertical-align: middle; position: relative; top: -2px; }
+.page-head .page-sub.info { display: inline-block; margin-top: 12px; }
+.page-head .page-sub.info[hidden] { display: none; }
+.nowrap { white-space: nowrap; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .layout { margin-top: 40px; display: grid; gap: 32px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1024px) { .layout { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); } }
 .col { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
@@ -247,7 +256,7 @@ td.df { font-weight: 700; color: var(--ink); }
 @media (min-width: 640px) { .tech { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
 .tech .wrap { display: flex; flex-direction: column; gap: 20px; }
 .tech p { font-size: 14px; line-height: 24px; color: var(--text-2); max-width: 70ch; }
-.tech .wrap > p { margin-inline: auto; text-align: center; }
+.tech .wrap > p { max-width: 120ch; margin-inline: auto; text-align: center; }
 .btn-out { width: 100%; padding: 12px 16px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #cad5e2; border-radius: 8px;
   font-size: 14px; font-weight: 600; color: var(--ink); background: transparent; }
 .btn-out:hover { background: var(--page); }
@@ -307,8 +316,8 @@ html.embed .calc { padding-top: 40px; }
   <div class="wrap">
     <header class="page-head">
       <p class="eyebrow">Simulação financeira</p>
-      <h1>O Custo do Fixo&nbsp;- Simulador Estatístico do VSR</h1>
-      <p class="page-sub" id="page-sub">Modelo PoliVSR · 4.000 simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · R$ de set/2026</p>
+      <h1><span class="h1-main">O Custo do Fixo</span><span class="sr-only">: </span><span class="h1-sub">Simulador Estatístico do <span class="nowrap">VSR<button type="button" class="info-btn sm h1-info" aria-expanded="false" aria-controls="page-sub" aria-label="Sobre o modelo"><svg><use href="#i-info"/></svg></button></span></span></h1>
+      <p class="page-sub info" id="page-sub" hidden>Modelo PoliVSR · 4.000 simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · R$ de set/2026</p>
     </header>
 
     <div class="layout">
