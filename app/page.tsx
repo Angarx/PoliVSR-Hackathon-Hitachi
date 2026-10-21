@@ -306,9 +306,7 @@ function WindingRoadmapSection() {
   </section>
 }
 
-// Convite para transmissoras: o botão abre o e-mail com o assunto já preenchido.
 const CONTATO_EMAIL = 'pesquisa@polivsr.usp.br'
-const CONTATO_ASSUNTO = 'PoliVSR – estudo de caso'
 
 function ContactSection() {
   const [sent, setSent] = useState(false)
@@ -321,8 +319,7 @@ function ContactSection() {
   return <section className="bg-gray-950 px-6 py-24 text-white">
     <div className="mx-auto max-w-5xl">
       <h2 className="mb-4 text-4xl font-bold">Vamos estudar o VSR na sua concessão</h2>
-      <p className="mb-8 max-w-3xl text-lg text-gray-400">Se a sua transmissora vai instalar reatores de derivação, comparamos o VSR e os reatores fixos com os dados da sua subestação. Um VSR pode substituir dois bancos fixos e economizar um vão de manobra. Entre em contato para estudarmos o seu caso.</p>
-      <a href={`mailto:${CONTATO_EMAIL}?subject=${encodeURIComponent(CONTATO_ASSUNTO)}`} className="mb-12 inline-block rounded bg-red-600 px-8 py-4 text-center font-bold text-white hover:bg-red-700">Quero estudar o meu caso</a>
+      <p className="mb-12 max-w-3xl text-lg text-gray-400">Se a sua transmissora vai instalar reatores de derivação, comparamos o VSR e os reatores fixos com os dados da sua subestação. Um VSR pode substituir dois bancos fixos e economizar um vão de manobra. Entre em contato para estudarmos o seu caso.</p>
       <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
         <div className="flex flex-col gap-6 text-gray-300">
           <p><strong className="text-white">Projeto Conceitual:</strong> Hackathon Hitachi Energy 2026</p>
