@@ -2,13 +2,13 @@
 
 POLIVSR · PESQUISA APLICADA
 
-Num dia útil de verão, até as 22h, o SIN já fez cerca de
+Num dia útil de verão, até as 22h30, o SIN já fez cerca de
 
-248 manobras
+254 manobras
 
 de disjuntor para ligar e desligar reatores.
 
-Às 22h, a carga líquida está em 79 GW e recua depois do pico da noite. Com a carga mais leve, os reatores voltam a entrar para segurar a tensão.
+Às 22h30, a carga líquida está em 77 GW e recua depois do pico da noite. Com a carga mais leve, os reatores voltam a entrar para segurar a tensão.
 
 Arraste sobre a curva para acompanhar a operação ao longo do dia.
 
@@ -29,6 +29,20 @@ Somos o PoliVSR, um núcleo de Inteligência de Rede formado por pesquisadores d
 O que é o VSR e por que investigamos esta alternativa?
 
 Hoje, a rede utiliza amplamente reatores fixos que operam em estados binários (ligado/desligado). Para controlar a tensão em cenários voláteis, realizam-se manobras de disjuntor que, ao longo do tempo, geram desgaste mecânico e elétrico. O Variable Shunt Reactor (VSR) atua de forma dinâmica lenta, semelhante a um dimmer. Equipado com um comutador sob carga (OLTC), ele altera o número de espiras ativas em pequenos degraus automáticos, ajustando a absorção de potência reativa sem desconectar o ativo. Nosso estudo propõe avaliar como essa estabilidade se converte em economia frente a outras alternativas.
+
+## Roadmap – visão geral (todas as fases)
+
+Fase 0: Base e modelo — Concluída. Resultado: Comparação entre VSR e reator fixo com dados públicos.
+
+Fase 1: Mapa de oportunidades — Próxima (previsão de 0 a 6 meses). Resultado: Lista das subestações onde um VSR tende a sair mais barato.
+
+Fase 2: Medição com transmissoras — Planejada (previsão de cerca de 1 ano). Resultado: Calculadora calibrada com a operação real e plano de troca preventiva.
+
+Fase 3: Estudo de caso real — Planejada. Resultado: Decisão técnica e econômica para uma obra concreta.
+
+Fase 4: Piloto em campo — Planejada. Resultado: Os primeiros dados de VSR em operação na rede brasileira.
+
+Fase 5: Regras e referências de preço — Planejada. Resultado: Permitir que transmissoras escolham o VSR quando for a opção mais barata.
 
 ## Roadmap – Fase 0: Base e modelo
 

@@ -113,6 +113,14 @@ async function extractHome(browser) {
       return { phaseNumber, title, status, description, result }
     }))
 
+    addSection(
+      'Roadmap – visão geral (todas as fases)',
+      phases.map(phase => {
+        const result = phase.result.replace(/^Resultado:\s*/i, '').trim()
+        return `Fase ${phase.phaseNumber}: ${phase.title} — ${phase.status}. Resultado: ${result}`
+      }).join('\n\n'),
+    )
+
     for (const phase of phases) {
       addSection(
         `Roadmap – Fase ${phase.phaseNumber}: ${phase.title}`,
