@@ -37,15 +37,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function validateMessages(value: unknown): Mensagem[] | null {
   if (!isRecord(value) || !Array.isArray(value.mensagens)) return null
-  if (value.mensagens.length < 1 || value.mensagens.length > 12) return null
+  if (value.mensagens.length < 1 || value.mensagens.length > 50) return null
 
+  const ultimasMensagens = value.mensagens.slice(-12)
   const mensagens: Mensagem[] = []
-  for (const item of value.mensagens) {
+  for (const [index, item] of ultimasMensagens.entries()) {
     if (!isRecord(item) || (item.papel !== 'usuario' && item.papel !== 'assistente')) return null
     if (typeof item.texto !== 'string') return null
     const texto = item.texto.trim()
-    if (!texto || texto.length > 600) return null
-    mensagens.push({ papel: item.papel, texto })
+    if (!texto || (index === ultimasMensagens.length - 1 && texto.length > 600)) return null
+    mensagens.push({ papel: item.papel, texto: texto.slice(0, 600) })
   }
 
   return mensagens.at(-1)?.papel === 'usuario' ? mensagens : null
