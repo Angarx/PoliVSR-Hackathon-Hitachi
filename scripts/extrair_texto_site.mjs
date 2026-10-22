@@ -81,9 +81,15 @@ async function extractHome(browser) {
     await page.locator('#about-project').waitFor()
 
     const hero = page.locator('main > section').first()
-    addSection('Página inicial — destaque', joinTexts(await hero.locator('p, h1, h2, h3').evaluateAll(elements =>
-      elements.map(element => element.innerText || ''),
-    )))
+    const heroTexts = await hero.locator('p, h1, h2, h3').evaluateAll(elements =>
+      elements
+        .map(element => (element.innerText || '').replace(/\s+/g, ' ').trim())
+        .filter(text =>
+          text === 'POLIVSR · PESQUISA APLICADA'
+          || text.startsWith('A curva é a carga líquida média do SIN'),
+        ),
+    )
+    addSection('Página inicial — destaque', joinTexts(heroTexts))
 
     addSection('Quem somos — O projeto PoliVSR', joinTexts(
       await getTexts(page, '#about-project p, #about-project h2, #about-project h3'),

@@ -2,16 +2,6 @@
 
 POLIVSR · PESQUISA APLICADA
 
-Num dia útil de verão, até as 22h30, o SIN já fez cerca de
-
-254 manobras
-
-de disjuntor para ligar e desligar reatores.
-
-Às 22h30, a carga líquida está em 77 GW e recua depois do pico da noite. Com a carga mais leve, os reatores voltam a entrar para segurar a tensão.
-
-Arraste sobre a curva para acompanhar a operação ao longo do dia.
-
 A curva é a carga líquida média do SIN no verão de 2025–26 (ONS). O contador é uma estimativa: o ONS prevê cerca de 140 reatores chaveados num dia útil de verão de 2026, cada um entrando e saindo ao menos uma vez (≈ 280 manobras), distribuídas pelas horas conforme a carga líquida sobe ou desce.
 
 ## Quem somos — O projeto PoliVSR
