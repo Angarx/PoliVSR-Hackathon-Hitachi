@@ -233,6 +233,33 @@ def join_pdf_lines(lines: list[str]) -> str:
     return joined
 
 
+def append_pdf_paragraph(
+    paragraphs: list[Paragraph],
+    text: str,
+    page_number: int,
+    heading: str | None,
+) -> None:
+    if not text:
+        return
+
+    if paragraphs:
+        previous = paragraphs[-1]
+        previous_text = previous.texto.rstrip()
+        starts_lowercase = text[:1].islower()
+        if (
+            previous.heading == heading
+            and not previous_text.endswith((".", ":", ";", "?", "!"))
+            and starts_lowercase
+        ):
+            if previous_text.endswith("-"):
+                previous.texto = f"{previous_text[:-1]}{text}"
+            else:
+                previous.texto = f"{previous_text} {text}"
+            return
+
+    paragraphs.append(Paragraph(text, page_number, heading))
+
+
 def pdf_paragraphs(path: Path) -> list[Paragraph]:
     document = pymupdf.open(path)
     pages: list[list[list[dict[str, Any]]]] = []
@@ -299,16 +326,22 @@ def pdf_paragraphs(path: Path) -> list[Paragraph]:
                 )
                 if is_heading:
                     if body_lines:
-                        paragraph_text = join_pdf_lines(body_lines)
-                        if paragraph_text:
-                            paragraphs.append(Paragraph(paragraph_text, page_number, current_heading))
+                        append_pdf_paragraph(
+                            paragraphs,
+                            join_pdf_lines(body_lines),
+                            page_number,
+                            current_heading,
+                        )
                         body_lines = []
                     current_heading = strip_emoji(text).strip()
                 else:
                     body_lines.append(text)
-            paragraph_text = join_pdf_lines(body_lines)
-            if paragraph_text:
-                paragraphs.append(Paragraph(paragraph_text, page_number, current_heading))
+            append_pdf_paragraph(
+                paragraphs,
+                join_pdf_lines(body_lines),
+                page_number,
+                current_heading,
+            )
 
     document.close()
     return paragraphs

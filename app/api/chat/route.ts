@@ -27,6 +27,9 @@ const requestBuckets = new Map<string, RequestBucket>()
 const RATE_LIMIT = 20
 const RATE_WINDOW_MS = 10 * 60 * 1000
 const FALLBACK_ANSWER = 'Não consegui responder agora. Fale com a equipe PoliVSR.'
+const MAX_CONTEXT_TEXT_CHARS = 7000
+const knowledgeBase = base as Trecho[]
+const versaoVigente = knowledgeBase.find(trecho => trecho.titulo === 'Versão vigente')
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -67,6 +70,34 @@ function allowRequest(request: Request): boolean {
     }
   }
   return true
+}
+
+function indicaContatoComEquipe(texto: string): boolean {
+  const normalized = texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+  return /\b(?:fale|falar|converse|conversar|entre em contato|contato com|contate|contatar|procure|consulte|consultar|indique|indicar|busque|buscar)\b.{0,100}\b(?:equipe|time)\b/.test(normalized)
+    || /\b(?:equipe|time)\b.{0,80}\b(?:pode|podera|consegue|vai)\b.{0,50}\b(?:ajudar|orientar|informar|esclarecer|atender)\b/.test(normalized)
+}
+
+function montarContexto(pergunta: string): string {
+  const encontrados = buscar(pergunta, knowledgeBase)
+  const candidatos = versaoVigente
+    ? [versaoVigente, ...encontrados.filter(trecho => trecho.id !== versaoVigente.id)]
+    : encontrados
+  const selecionados: Trecho[] = []
+  const ids = new Set<string>()
+  let totalTexto = 0
+
+  for (const trecho of candidatos) {
+    if (ids.has(trecho.id) || totalTexto + trecho.texto.length > MAX_CONTEXT_TEXT_CHARS) continue
+    selecionados.push(trecho)
+    ids.add(trecho.id)
+    totalTexto += trecho.texto.length
+  }
+
+  return formatarContexto(selecionados)
 }
 
 async function callGroq(
@@ -136,7 +167,7 @@ export async function POST(request: Request) {
   const retrievalQuestion = previousQuestion
     ? `${previousQuestion}\n${latestQuestion}`
     : latestQuestion
-  const contexto = formatarContexto(buscar(retrievalQuestion, base as Trecho[]))
+  const contexto = montarContexto(retrievalQuestion)
   const groqMessages = [
     { role: 'system' as const, content: montarPromptSistema(contexto) },
     ...mensagens.slice(-6).map(mensagem => ({
@@ -166,10 +197,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ resposta: FALLBACK_ANSWER, contato: true })
   }
 
-  const contato = generated.includes(MARCA_CONTATO)
+  const indicaContato = generated.includes(MARCA_CONTATO)
   const resposta = generated.replaceAll(MARCA_CONTATO, '').trim()
   return NextResponse.json({
     resposta: resposta || FALLBACK_ANSWER,
-    contato: contato || !resposta,
+    contato: (indicaContato && indicaContatoComEquipe(resposta)) || !resposta,
   })
 }
