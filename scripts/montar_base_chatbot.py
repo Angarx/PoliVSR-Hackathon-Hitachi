@@ -44,6 +44,12 @@ SOURCES = [
         "fonte": "Análise de concorrência (consolidado)",
         "kind": "markdown",
     },
+    {
+        "path": "lib/chatbot/site.md",
+        "fonte": "Site PoliVSR",
+        "kind": "markdown",
+        "root": "repo",
+    },
 ]
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "lib/chatbot/base.json"
 
@@ -370,7 +376,8 @@ def main() -> None:
     counts: Counter[str] = Counter()
 
     for source_index, source in enumerate(SOURCES):
-        path = root / source["path"]
+        source_root = Path(__file__).resolve().parents[1] if source.get("root") == "repo" else root
+        path = source_root / source["path"]
         if source["kind"] == "pdf":
             chunks = pdf_chunks(path, source["fonte"], source_index)
         else:

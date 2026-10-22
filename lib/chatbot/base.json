@@ -1702,5 +1702,263 @@
     "titulo": "Empresas não aprofundadas (mapeamento) · Parte 2",
     "fonte": "Análise de concorrência (consolidado)",
     "texto": "https://www.power-technology.com/contractors/switchgear/pauwels/ • Xi'an XD Electric / TBEA — https://pmarketresearch.com/auto/controllable-shunt-reactor-for-uhv-market/ ; https://www.volza.com/p/shunt-reactor/export/export-from-china/"
+  },
+  {
+    "id": "5-0-1",
+    "titulo": "Página inicial — destaque",
+    "fonte": "Site PoliVSR",
+    "texto": "POLIVSR · PESQUISA APLICADA\n\nNum dia útil de verão, até as 22h, o SIN já fez cerca de\n\n248 manobras\n\nde disjuntor para ligar e desligar reatores.\n\nÀs 22h, a carga líquida está em 79 GW e recua depois do pico da noite. Com a carga mais leve, os reatores voltam a entrar para segurar a tensão.\n\nArraste sobre a curva para acompanhar a operação ao longo do dia.\n\nA curva é a carga líquida média do SIN no verão de 2025–26 (ONS). O contador é uma estimativa: o ONS prevê cerca de 140 reatores chaveados num dia útil de verão de 2026, cada um entrando e saindo ao menos uma vez (≈ 280 manobras), distribuídas pelas horas conforme a carga líquida sobe ou desce."
+  },
+  {
+    "id": "5-1-1",
+    "titulo": "Quem somos — O projeto PoliVSR",
+    "fonte": "Site PoliVSR",
+    "texto": "O PROJETO POLIVSR\n\nDa pesquisa aplicada à rede do futuro.\n\nQuem somos\n\nSomos o PoliVSR, um núcleo de Inteligência de Rede formado por pesquisadores da Poli-USP, viabilizado por fomento à pesquisa da Hitachi Energy. Atuamos na validação técnica e econômica independente para os novos desafios do Sistema Interligado Nacional (SIN). Com a expansão das linhas e o crescimento das renováveis intermitentes, a demanda flutua drasticamente e a tensão se eleva em cargas leves. O PoliVSR investiga e quantifica em quais cenários a adoção de tecnologias de ajuste contínuo (VSR) traz viabilidade financeira e resiliência à rede, substituindo a rigidez operacional atual."
+  },
+  {
+    "id": "5-2-1",
+    "titulo": "O que é o VSR e por que investigamos esta alternativa?",
+    "fonte": "Site PoliVSR",
+    "texto": "O que é o VSR e por que investigamos esta alternativa?\n\nHoje, a rede utiliza amplamente reatores fixos que operam em estados binários (ligado/desligado). Para controlar a tensão em cenários voláteis, realizam-se manobras de disjuntor que, ao longo do tempo, geram desgaste mecânico e elétrico. O Variable Shunt Reactor (VSR) atua de forma dinâmica lenta, semelhante a um dimmer. Equipado com um comutador sob carga (OLTC), ele altera o número de espiras ativas em pequenos degraus automáticos, ajustando a absorção de potência reativa sem desconectar o ativo. Nosso estudo propõe avaliar como essa estabilidade se converte em economia frente a outras alternativas."
+  },
+  {
+    "id": "5-3-1",
+    "titulo": "Roadmap – Fase 0: Base e modelo",
+    "fonte": "Site PoliVSR",
+    "texto": "Concluída\n\nBase de dados com 92 arquivos públicos do ONS, ANEEL e BC; modelo físico e financeiro (Monte Carlo). Calculadora “O Custo do Fixo” criada no Hackathon Hitachi Energy 2026.\n\nResultado: Comparação entre VSR e reator fixo com dados públicos."
+  },
+  {
+    "id": "5-4-1",
+    "titulo": "Roadmap – Fase 1: Mapa de oportunidades",
+    "fonte": "Site PoliVSR",
+    "texto": "Próxima (previsão de 0 a 6 meses)\n\nAplicar a calculadora aos reatores novos previstos nos planos do ONS (PAR/PEL) e nos próximos leilões de transmissão.\n\nResultado: Lista das subestações onde um VSR tende a sair mais barato."
+  },
+  {
+    "id": "5-5-1",
+    "titulo": "Roadmap – Fase 2: Medição com transmissoras",
+    "fonte": "Site PoliVSR",
+    "texto": "Planejada (previsão de cerca de 1 ano)\n\nProjeto de P&D com uma transmissora (programa ANEEL), usando dados reais de manobras, desgaste de disjuntores e histórico de falhas.\n\nResultado: Calculadora calibrada com a operação real e plano de troca preventiva."
+  },
+  {
+    "id": "5-6-1",
+    "titulo": "Roadmap – Fase 3: Estudo de caso real",
+    "fonte": "Site PoliVSR",
+    "texto": "Planejada\n\nEscolher uma ou duas subestações do plano de expansão da transmissora parceira e comparar em detalhe o VSR e o reator fixo no local.\n\nResultado: Decisão técnica e econômica para uma obra concreta."
+  },
+  {
+    "id": "5-7-1",
+    "titulo": "Roadmap – Fase 4: Piloto em campo",
+    "fonte": "Site PoliVSR",
+    "texto": "Planejada\n\nInstalar um VSR em uma dessas subestações e acompanhar o funcionamento por um a dois anos.\n\nResultado: Os primeiros dados de VSR em operação na rede brasileira."
+  },
+  {
+    "id": "5-8-1",
+    "titulo": "Roadmap – Fase 5: Regras e referências de preço",
+    "fonte": "Site PoliVSR",
+    "texto": "Planejada\n\nCom os resultados, propor a inclusão do VSR na tabela de preços de referência da ANEEL e nos estudos de leilões.\n\nResultado: Permitir que transmissoras escolham o VSR quando for a opção mais barata."
+  },
+  {
+    "id": "5-9-1",
+    "titulo": "Cronograma",
+    "fonte": "Site PoliVSR",
+    "texto": "Cronograma\n\nPróxima\n\nFase 1 dura 6 meses; período previsto 0–6 meses\n\nFase 2 dura 1 ano; período previsto 6–18 meses\n\nFase 3 dura 6 meses; período previsto 18–24 meses\n\nFase 4 dura 2 anos; período previsto 24–48 meses\n\nFase 5 dura 1 ano; período previsto 48–60 meses"
+  },
+  {
+    "id": "5-10-1",
+    "titulo": "Calculadora — O Custo do Fixo",
+    "fonte": "Site PoliVSR",
+    "texto": "O Custo do Fixo\n\nSimulador Estatístico do VSR"
+  },
+  {
+    "id": "5-11-1",
+    "titulo": "Calculadora — Cenários operacionais",
+    "fonte": "Site PoliVSR",
+    "texto": "Centro Urbano: Base: Salvador, Recife, Fortaleza · 230 kV\n\nCampo: Base: Interligação N–NE · 500 kV\n\nPolo eólico: Base: carga líquida do Nordeste · 500 kV"
+  },
+  {
+    "id": "5-12-1",
+    "titulo": "Calculadora — Premissas e explicações",
+    "fonte": "Site PoliVSR",
+    "texto": "Premissas-base: Leilão; fixo de 500 kV com fase reserva por banco (padrão EPE); OLTC a vácuo; VSR sem reserva própria.\n\nReforço com RAP pelo BPR: Reforço autorizado: a RAP vem do Banco de Preços da ANEEL, então a receita do vão que deixa de existir também sai.\n\nPrêmio reconhecido na RAP: Cenário otimista: o prêmio do VSR é remunerado na RAP.\n\nReserva do VSR em pool de 1 para 10: Uma unidade reserva para cada 10 VSR, como a BPA faz com reatores de 500 kV.\n\nReserva do VSR de 1 para 3: Uma unidade reserva para cada 3 VSR, com reparo em 30 dias.\n\nFase reserva compartilhada pelos 2 bancos: Uma fase reserva compartilhada pelos dois bancos fixos, em vez de uma por banco.\n\nFixo sem fase reserva: Banco fixo sem fase reserva: sem esse custo, mas também sem a franquia de 3 h na falha.\n\nOLTC a óleo (teste de estresse): Teste de estresse: OLTC a óleo, com manutenção a cada 1 ano. O padrão de mercado para VSR é vácuo."
+  },
+  {
+    "id": "5-13-1",
+    "titulo": "Calculadora — Sobre o modelo (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Modelo PoliVSR · 4.000 simulações de Monte Carlo por cenário · fluxos mensais em 30 anos · R$ de set/2026"
+  },
+  {
+    "id": "5-14-1",
+    "titulo": "Calculadora — O que é a curva de cada cenário (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "A curva de cada cartão é a carga (ou o fluxo) que move o cenário num dia típico. No Centro Urbano é a curva de pato: cai ao meio-dia com a geração solar e sobe à noite. Quanto mais baixa a curva, mais folgadas ficam as linhas e mais reator a subestação precisa ligado."
+  },
+  {
+    "id": "5-15-1",
+    "titulo": "Calculadora — Sobre quem avalia (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Fluxo de caixa da transmissora a 12,11% a.a. real, antes de impostos, com Parcela Variável."
+  },
+  {
+    "id": "5-16-1",
+    "titulo": "Calculadora — Sobre o preço do VSR (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Só o equipamento, sem o vão. Vem de contratos europeus de 2025–26 (sem frete e impostos no Brasil), escalados para 300 Mvar e 500 kV. Prêmio de +58% sobre os dois reatores fixos que ele substitui (R$ 27,0 mi)."
+  },
+  {
+    "id": "5-17-1",
+    "titulo": "Calculadora — Sobre o preço do reator fixo (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Só o equipamento: banco de 150 Mvar (3 unidades monofásicas de 50 Mvar), sem a fase reserva e sem o vão. Referência: EPE-DEE-NT-077/2021 (base de preços da ANEEL de mar/2021) corrigida pelo IPCA. No preço de referência."
+  },
+  {
+    "id": "5-18-1",
+    "titulo": "Calculadora — Sobre a premissa escolhida (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Leilão; fixo de 500 kV com fase reserva por banco (padrão EPE); OLTC a vácuo; VSR sem reserva própria."
+  },
+  {
+    "id": "5-19-1",
+    "titulo": "Calculadora — Sobre o investimento e a unidade comparada (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Unidade comparada: 1 VSR de 150–300 Mvar no lugar de 2 bancos fixos de 150 Mvar, cada um com seu vão (arranjo 2:1, 500 kV).\n\nVão de manobra: módulo de conexão de reator (disjuntor, seccionadoras, transformadores de medição, para-raios, proteção, estruturas e obras civis), EPE 2021 corrigido pelo IPCA, igual nas duas alternativas. Fixo e vão são referências regulatórias brasileiras; o VSR vem de contratos europeus. Os escopos podem não ser idênticos."
+  },
+  {
+    "id": "5-20-1",
+    "titulo": "Calculadora — O que é o VPL (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Diferença de custo entre os reatores fixos e o VSR em 30 anos, trazida a valor presente (VPL). Positivo: o VSR sai mais barato. O número grande é a mediana de 4.000 simulações; P10 e P90 são os casos pessimista e otimista."
+  },
+  {
+    "id": "5-21-1",
+    "titulo": "Calculadora — Sobre o preço de equilíbrio (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Com cada reator fixo a R$ 13,5 mi. Contratos públicos de 2025–26: R$ 37,1 mi a R$ 50,1 mi (escalados para este VSR)."
+  },
+  {
+    "id": "5-22-1",
+    "titulo": "Calculadora — Como ler os indicadores (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Payback: mês em que a economia acumulada do VSR passa a ser positiva (mediana das simulações). Manobras evitadas: manobras por ano do disjuntor do reator fixo manobrável que deixam de acontecer. Troca do disjuntor: o do fixo chega ao fim da vida mecânica em cerca de 11 anos; o do VSR quase não manobra e não precisa ser trocado em 30 anos. Vão evitado: módulo de conexão de reator (disjuntor, seccionadoras, transformadores de medição, para-raios, proteção, estruturas e obras civis)."
+  },
+  {
+    "id": "5-23-1",
+    "titulo": "Calculadora — risco — Como ler este gráfico (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Custo acumulado de cada alternativa, em valor presente, ao longo de 30 anos. A linha é a mediana das 4.000 simulações e a faixa vai do P10 ao P90. Quanto mais baixa a curva, mais barata a alternativa."
+  },
+  {
+    "id": "5-24-1",
+    "titulo": "Calculadora — preco — Como ler este gráfico (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "VPL do VSR em função do preço dele, com o reator fixo no preço escolhido. Acima de zero, o VSR compensa. O ponto preto marca o preço de equilíbrio; a linha vertical, o preço simulado."
+  },
+  {
+    "id": "5-25-1",
+    "titulo": "Calculadora — operacao — Como ler este gráfico (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Dia típico (06/08/2025), subestação de 500 kV. Linha escura: Fluxo Norte–Nordeste (módulo do fluxo verificado na interligação (ONS)). Aqui não há curva de pato: o que move o cenário é o fluxo na interligação. Quando a curva desce, as linhas ficam folgadas, sobra energia reativa e é preciso ligar reator. O eixo da direita mostra o reator ligado: no alto, 150 Mvar (só o reator permanente, ou o VSR no mínimo); embaixo, 300 Mvar (os 2 reatores, ou o VSR no máximo). Essa escala não é linear: ela põe o reator na altura da carga que o exige, e a sobra de reativo da linha depende do quadrado da carga. O VSR acompanha a curva em passos de 1/32 da faixa (86 trocas de tap nesse dia); o reator fixo só liga ou desliga inteiro (2 manobras). Dos 2 fixos, um fica sempre ligado e não aparece. No Campo, o modelo representa o corredor com 6 bancos (11 manobras nesse dia); aqui aparece um deles. Dados a cada hora."
+  },
+  {
+    "id": "5-26-1",
+    "titulo": "Calculadora — valor — Como ler este gráfico (Campo)",
+    "fonte": "Site PoliVSR",
+    "texto": "Valor presente médio de cada parcela da comparação, nos preços escolhidos. Verde é a favor do VSR, vermelho é contra. A soma das parcelas é o VPL médio."
+  },
+  {
+    "id": "5-27-1",
+    "titulo": "Calculadora — Nota técnica",
+    "fonte": "Site PoliVSR",
+    "texto": "Nota técnica: simulação estocástica de confiabilidade e custo. Cada cenário roda 4.000 trajetórias mensais de 30 anos com as manobras do modelo físico (ONS: DESSEM e intercâmbio N–NE), taxas de falha de disjuntor e de reator da CIGRÉ, Parcela Variável do Módulo 4 da ANEEL e preços da EPE. O preço do reator fixo e o do vão são referências regulatórias brasileiras (EPE, base de preços da ANEEL de 2021, corrigida pelo IPCA); o do VSR vem de contratos públicos de operadores europeus, escalados para a tensão e a potência de cada cenário. Os dois preços podem ser ajustados acima, até a Hitachi Energy cotar o caso brasileiro."
+  },
+  {
+    "id": "5-28-1",
+    "titulo": "Calculadora — Ver metodologia e fontes · Parte 1",
+    "fonte": "Site PoliVSR",
+    "texto": "O PDF pode ser baixado neste painel pelo link \"Baixar relatório de metodologia (PDF)\".\n\nComo o modelo funciona\n\nUnidade comparada: um VSR com faixa de 50–100% no lugar de dois bancos de reatores fixos (o manobrável e uma fatia igual da compensação permanente), cada banco com seu vão de manobra.\n\nCamada física: a necessidade de reativo sai da sobra de reativo das linhas, Qc·(1 − (P/SIL)²), com as séries do ONS (DESSEM e intercâmbio N–NE de 2025–26). O fixo liga e desliga em degraus; o VSR troca de tap.\n\nCamada financeira: 4.000 trajetórias mensais de 30 anos por cenário, com preventiva a cada 72 meses, revisão geral por contagem de ciclos, troca do disjuntor no fim da vida mecânica, falhas maiores e menores (CIGRÉ TB 510), falhas do reator e do OLTC (CIGRÉ TB 939 e 642) e Parcela Variável (ANEEL, Módulo 4 rev.2).\n\nTaxas: transmissora a 12,11% a.a. real antes de impostos (WACC ANEEL 2026); sistema a 8,5% a.a. real (taxa social de desconto)."
+  },
+  {
+    "id": "5-28-2",
+    "titulo": "Calculadora — Ver metodologia e fontes · Parte 2",
+    "fonte": "Site PoliVSR",
+    "texto": "Preço do reator fixo e do vão: EPE-DEE-NT-077/2021 (reator monofásico de 500 kV e 66,6 Mvar a R$ 4,415 mi; conexão de reator de barra a R$ 9,589 mi; base de preços da ANEEL de mar/2021), corrigida pelo IPCA até set/2026. A 500 kV o banco fixo de referência tem fase reserva (3+1R). A 230 kV não há preço público: o reator sai do 500 kV por regra de escala (premissa).\n\nOs dois preços são só do equipamento; o vão entra à parte, igual nas duas alternativas. O preço do fixo pode ser ajustado de −50% a +60% da referência. Cada fluxo do modelo é linear nos dois preços, então a calculadora usa três rodadas de mesma semente para calcular a grade exata e interpola entre os pontos.\n\nGráfico do dia: a carga (ou o fluxo) que move o cenário e o reator ligado numa subestação com 2 reatores fixos (um manobrável e um sempre ligado) contra 1 VSR. O reator aparece na escala da carga pela fórmula do modelo, r = (hi² − u²)/(hi² − lo²): o fixo liga e desliga o banco inteiro; o VSR muda em passos de 1/32 da faixa (33 posições de tap)."
+  },
+  {
+    "id": "5-28-3",
+    "titulo": "Calculadora — Ver metodologia e fontes · Parte 3",
+    "fonte": "Site PoliVSR",
+    "texto": "O que pesa contra o VSR (está no simulador)\n\nPreço do VSR no nível do contrato de 2023 da Energinet: o VSR não compensa.\n\nReator fixo mais barato que a referência: no Campo, cada 10% a menos no preço do fixo tira cerca de R$ 3,6 mi do VPL; com o preço de 2021 sem correção pela inflação, o VPL mediano fica perto de zero.\n\nReforço autorizado com RAP pelo Banco de Preços da ANEEL: negativo para a transmissora, positivo para o sistema.\n\nOLTC a óleo, fixo sem fase reserva ou reserva do VSR de 1 para 3: o resultado cai perto de zero ou abaixo.\n\nO preço do VSR é uma estimativa a partir de contratos europeus; a cotação da Hitachi Energy para o caso brasileiro substitui esta faixa.\n\nO que o modelo não monetiza\n\nFim dos degraus de tensão a cada manobra, regulação contínua que ajuda a integrar solar e eólica, uso do VSR como reserva flexível em várias posições da rede e menor área ocupada.\n\nContratos públicos de VSR usados no preço"
+  },
+  {
+    "id": "5-28-4",
+    "titulo": "Calculadora — Ver metodologia e fontes · Parte 4",
+    "fonte": "Site PoliVSR",
+    "texto": "Comprador | Ano | VSR | Preço por unidade | Uso Litgrid (Lituânia) | 2026 | 330 kV, 140 Mvar | € 3,50 mi | base Energinet (Dinamarca) | 2025 | 400 kV, 140 Mvar | € 4,29 mi | base Energinet (Dinamarca) | 2023 | 400 kV, 140 Mvar | € 7,68 mi | estresse Energy Community – índice de custo unitário (3 contratos) | 2025 | 400 kV, 200 Mvar | € 10,20 mi | estresse HOPS (Croácia) – Melina | 2019 | 400 kV, 200 Mvar | € 4,93 mi | referência (preço anterior a 2021) HOPS (Croácia) – Mraclin | 2019 | 220 kV, 100 Mvar | € 3,34 mi | referência (preço anterior a 2021) PSEG / PJM (EUA) | 2023 | 230 kV, 150 Mvar | US$ 29,6 mi por 2 projetos de VSR de 150 Mvar (230 e 345 kV) | contexto (escopo de projeto) Elektroprenos BiH (Bósnia) | 2025 | 400 kV, 150 Mvar | € 54,3 mi por 4 VSR com vãos e SCADA | contexto (escopo de projeto)\n\nEscala: preço ∝ Mvar^0,6 × kV^β, β de 0,3 a 1,0 (central 0,5); câmbio de € 1 = R$ 5,92 (BCB, set/2026). Base = média dos contratos de 2025–26."
+  },
+  {
+    "id": "5-29-1",
+    "titulo": "Monte Carlo — Apresentação",
+    "fonte": "Site PoliVSR",
+    "texto": "SIMULAÇÃO DE MONTE CARLO\n\n4.000 futuros possíveis para cada cenário\n\nNinguém sabe quando um disjuntor vai falhar ou quanto vai custar o reparo. Por isso a calculadora não faz uma conta só: ela sorteia as incertezas dentro de faixas tiradas da literatura técnica, simula 30 anos mês a mês e repete isso 4.000 vezes."
+  },
+  {
+    "id": "5-30-1",
+    "titulo": "Monte Carlo — Como cada simulação funciona",
+    "fonte": "Site PoliVSR",
+    "texto": "Como cada simulação funciona\n\nSorteia as incertezas\n\nEscolhe um valor para cada um dos 19 parâmetros da lista abaixo, dentro da faixa de cada um.\n\nSimula 360 meses\n\nMês a mês, sorteia falhas, reparos e paradas, e soma manutenções, trocas de disjuntor e multas da ANEEL.\n\nCompara as duas opções\n\nCalcula o custo dos reatores fixos e o do VSR, em valor presente, e guarda a diferença: o VPL.\n\nRepete 4.000 vezes\n\nCada repetição é um futuro diferente. O resultado da calculadora é o retrato desses 4.000 futuros."
+  },
+  {
+    "id": "5-31-1",
+    "titulo": "Monte Carlo — O que sai das simulações — Centro Urbano",
+    "fonte": "Site PoliVSR",
+    "texto": "Os 4.000 resultados\n\nCentro Urbano, 230 kV, visão da transmissora: fluxo de caixa a 12,11% ao ano, com a multa da ANEEL (Parcela Variável). VSR a R$ 8,6 mi contra dois reatores fixos a R$ 5,8 mi no total, nos preços de referência."
+  },
+  {
+    "id": "5-32-1",
+    "titulo": "Monte Carlo — O que sai das simulações — Campo",
+    "fonte": "Site PoliVSR",
+    "texto": "Os 4.000 resultados\n\nCampo, 500 kV, visão da transmissora: fluxo de caixa a 12,11% ao ano, com a multa da ANEEL (Parcela Variável). VSR a R$ 42,5 mi contra dois reatores fixos a R$ 27,0 mi no total, nos preços de referência."
+  },
+  {
+    "id": "5-33-1",
+    "titulo": "Monte Carlo — O que sai das simulações — Polo eólico",
+    "fonte": "Site PoliVSR",
+    "texto": "Os 4.000 resultados\n\nPolo eólico, 500 kV, visão da transmissora: fluxo de caixa a 12,11% ao ano, com a multa da ANEEL (Parcela Variável). VSR a R$ 42,5 mi contra dois reatores fixos a R$ 27,0 mi no total, nos preços de referência."
+  },
+  {
+    "id": "5-34-1",
+    "titulo": "Monte Carlo — O que é sorteado mês a mês",
+    "fonte": "Site PoliVSR",
+    "texto": "O que é sorteado mês a mês\n\nDentro de cada simulação, o modelo sorteia em cada mês se acontece cada evento e quanto ele dura, usando os parâmetros sorteados para aquela simulação (lista abaixo).\n\nFalhas de disjuntor em cada mês\n\nSorteio de Poisson com a taxa da simulação. A taxa de cada disjuntor fica entre a do que quase não manobra e a do que manobra todo dia, conforme as manobras dele.\n\nTempo de reparo do disjuntor\n\nReparo no local: mediana de 24 horas, 9 em cada 10 até 100 horas. Na fábrica: de 14 a 42 dias. Explosão: 30 dias e 1,5 vez o preço do disjuntor.\n\nFalha grave de reator ou do VSR\n\nCusto de 30% a 100% do equipamento. O VSR sem reserva fica parado com mediana de 180 dias (9 em cada 10 até 540 dias). No fixo de 500 kV, a fase reserva entra em até 3 horas.\n\nFalha do comutador do VSR\n\nDe 3 a 21 dias parado e custo de 5% a 15% do preço do VSR.\n\nCarga cortada (só visão do sistema)\n\nEnergia não suprida com mediana de 11,5 MWh por corte (9 em cada 10 até cerca de 140 MWh), dos dados do ONS de 2016 a 2025, ao custo do déficit."
+  },
+  {
+    "id": "5-35-1",
+    "titulo": "Monte Carlo — O que muda de uma simulação para outra · Parte 1",
+    "fonte": "Site PoliVSR",
+    "texto": "O que muda de uma simulação para outra\n\nCada parâmetro é sorteado uma vez por simulação e vale para os 30 anos dela. A figurinha mostra o formato do sorteio dentro da faixa.\n\nTriangular: valores perto do mais provável saem mais\n\nUniforme: qualquer valor da faixa, com a mesma chance\n\nDISJUNTORES\n\nValem para cada disjuntor das duas opções. O do reator fixo manobra todo dia; o do VSR quase nunca.\n\nFalhas graves de disjuntor que quase não manobra\n\nEntra em: fixo e VSR · Fonte: CIGRÉ TB 510\n\n0,23 a 0,28% ao ano mais provável: 0,25\n\nFalhas graves de disjuntor que manobra reator uma vez por dia\n\n1,98 a 3,02% ao ano mais provável: 2,46\n\nFalhas pequenas para cada falha grave\n\nEntra em: fixo e VSR · Fonte: CIGRÉ TB 510 (derivado)\n\n7,1 a 7,9 falhas todos com a mesma chance\n\nChance de a falha grave ser uma explosão\n\nEntra em: fixo e VSR · Fonte: premissa\n\n2 a 8% todos com a mesma chance\n\nChance de o reparo ir para a fábrica\n\nEntra em: fixo e VSR · Fonte: manual GE GL314; premissa\n\n5 a 15% todos com a mesma chance"
+  },
+  {
+    "id": "5-35-2",
+    "titulo": "Monte Carlo — O que muda de uma simulação para outra · Parte 2",
+    "fonte": "Site PoliVSR",
+    "texto": "Custo do reparo de uma falha grave\n\n5 a 30% do disjuntor mais provável: 15\n\nCusto de uma falha pequena\n\n0,5 a 2,0% do disjuntor mais provável: 1,0\n\nCusto da manutenção preventiva (a cada 6 anos)\n\nEntra em: fixo e VSR · Fonte: Jeromin et al. 2009; premissa\n\n1 a 3% do disjuntor mais provável: 2\n\nManobras até a revisão geral (ou 20 anos)\n\nEntra em: fixo e VSR · Fonte: manual GE GL314; Hermosillo 2002\n\n2.000 a 5.000 manobras mais provável: 3.000\n\nCusto da revisão geral\n\nEntra em: fixo e VSR · Fonte: Jeromin et al. 2009\n\n7 a 13% do disjuntor mais provável: 10\n\nVida mecânica real até a troca do disjuntor\n\nEntra em: fixo e VSR · Fonte: IEC 62271-100; IEEE PES 2017\n\n2.000 a 10.000 manobras todos com a mesma chance\n\nErro no número de manobras do modelo físico\n\n0,8 a 1,2 × o calculado mais provável: 1,0\n\nREATORES E VSR\n\nA falha grave vale por unidade, para os reatores fixos e para o VSR.\n\nFalha grave de reator ou do VSR\n\nEntra em: fixo e VSR · Fonte: CIGRÉ TB 939; Martin e Tenbohlen 2026\n\n0,30 a 0,53% ao ano mais provável: 0,41"
+  },
+  {
+    "id": "5-35-3",
+    "titulo": "Monte Carlo — O que muda de uma simulação para outra · Parte 3",
+    "fonte": "Site PoliVSR",
+    "texto": "Falha do comutador do VSR\n\nEntra em: VSR · Fonte: CIGRÉ TB 642 e TB 939 (derivado)\n\n0,04 a 0,16% ao ano mais provável: 0,10\n\nTrocas de tap além das que os dados enxergam\n\nEntra em: VSR · Fonte: premissa (dados a cada 30 min ou 1 h)\n\n1 a 2 × o calculado todos com a mesma chance\n\nCusto da manutenção do comutador\n\nEntra em: VSR · Fonte: premissa\n\n1 a 3% do VSR mais provável: 2\n\nVÃO DE MANOBRA\n\nO fixo tem dois vãos; o VSR, um.\n\nOperação e manutenção de rotina do vão\n\nEntra em: fixo (2 vãos) e VSR (1 vão) · Fonte: premissa; teto da ANEEL (NT 103/2024)\n\n0,5 a 2,0% do vão por ano mais provável: 1,0\n\nSÓ NA VISÃO DO SISTEMA\n\nEntram só quando a visão escolhida é Sistema (SIN); não entram na conta da transmissora.\n\nChance de a falha grave de disjuntor cortar carga\n\n2 a 10% todos com a mesma chance\n\nValor da energia perdida no VSR\n\n150 a 400 R$ por MWh mais provável: 250"
+  },
+  {
+    "id": "5-36-1",
+    "titulo": "Monte Carlo — Detalhes técnicos e o que não é sorteado · Parte 1",
+    "fonte": "Site PoliVSR",
+    "texto": "Detalhes técnicos\n\n4.000 simulações por cenário, visão e premissa, cada uma com 360 meses; gerador numpy com semente fixa (11), então o resultado se repete a cada execução.\n\nNúmeros aleatórios comuns: os mesmos sorteios servem às duas opções e a todos os preços, então a diferença entre elas vem das escolhas, não do acaso.\n\nPrecisão: no Campo, visão da transmissora, o erro-padrão da média do VPL é de cerca de R$ 0,07 mi.\n\nEsta página usa as premissas-base e os preços de referência (VSR: média dos contratos de 2025–26; fixo: referência EPE/ANEEL de 2021 corrigida pelo IPCA). A visão da transmissora desconta a 12,11% ao ano; a do sistema (SIN), a 8,5% ao ano.\n\nO histograma usa faixas de R$ 0,1 mi, agrupadas conforme a largura da tela; as faixas começam no zero, então nenhum retângulo mistura resultados positivos e negativos.\n\nOs sorteios e as faixas desta página são conferidos contra o código do modelo (scripts 10 e 12 do projeto).\n\nO que não é sorteado\n\nVocê escolhe na calculadora\n\nPreço do VSR e preço do reator fixo"
+  },
+  {
+    "id": "5-36-2",
+    "titulo": "Monte Carlo — Detalhes técnicos e o que não é sorteado · Parte 2",
+    "fonte": "Site PoliVSR",
+    "texto": "Quem avalia: transmissora (12,11% ao ano) ou sistema (8,5% ao ano)\n\nPremissas: regime de reforço, reserva do VSR, fase reserva do fixo, comutador a óleo\n\nFica fixo no modelo\n\nTamanho dos reatores e preço do vão e do disjuntor\n\nManobras por dia do modelo físico (só multiplicadas pelo erro sorteado)\n\nReceita da função de transmissão e regras da multa da ANEEL (Parcela Variável)\n\nHorizonte de 30 anos, sem valor residual"
   }
 ]
