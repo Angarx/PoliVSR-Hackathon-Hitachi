@@ -268,6 +268,9 @@ td.df { font-weight: 700; color: var(--ink); }
 .method ul { margin: 8px 0 0; padding-left: 18px; font-size: 14px; line-height: 22px; color: var(--text-2); }
 .method li + li { margin-top: 6px; }
 .method a { color: var(--red-hover); }
+.method .method-download { justify-self: start; width: fit-content; max-width: 100%; color: #fff; }
+.method .method-download:hover { color: #fff; }
+@media (max-width: 480px) { .method .method-download { width: 100%; } }
 .method table { min-width: 560px; font-size: 13px; }
 .foot-nav { background: var(--surface); border-top: 1px solid var(--line); padding-block: 48px; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
 .foot-nav .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 20px 32px; }
@@ -984,6 +987,12 @@ html.embed .calc { padding-top: 40px; }
   /* ---------- metodologia ---------- */
   function buildMethod() {
     var host = el('method'); host.innerHTML = '';
+    var download = document.createElement('a');
+    download.href = '/PoliVSR_Relatorio_Metodologia.pdf';
+    download.download = '';
+    download.className = 'mc-link method-download';
+    download.innerHTML = '<svg aria-hidden="true"><use href="#i-file"/></svg><span><strong>Baixar relatório de metodologia (PDF)</strong></span>';
+    host.appendChild(download);
     function block(title, items) {
       var d = document.createElement('div'); var h = document.createElement('h3'); h.textContent = title; d.appendChild(h);
       var ul = document.createElement('ul'); items.forEach(function (it) { var li = document.createElement('li'); li.textContent = it; ul.appendChild(li); }); d.appendChild(ul); host.appendChild(d);

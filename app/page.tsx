@@ -184,7 +184,7 @@ function WindingRoadmapSection() {
     },
     {
       number: 4,
-      status: 'Planejada (opcional)',
+      status: 'Planejada',
       title: 'Piloto em campo',
       description: 'Instalar um VSR em uma dessas subestações e acompanhar o funcionamento por um a dois anos.',
       result: 'Os primeiros dados de VSR em operação na rede brasileira.',
