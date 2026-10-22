@@ -8,6 +8,7 @@ type Mensagem = {
   papel: 'usuario' | 'assistente'
   texto: string
   contato?: boolean
+  erro?: boolean
 }
 
 const sugestoes = [
@@ -75,10 +76,13 @@ export default function Chatbot() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mensagens: historico.map(({ papel, texto: mensagem }) => ({
-            papel,
-            texto: mensagem,
-          })),
+          mensagens: historico
+            .filter(mensagem => !mensagem.erro)
+            .slice(-12)
+            .map(({ papel, texto: mensagem }) => ({
+              papel,
+              texto: mensagem,
+            })),
         }),
       })
       const data = await response.json().catch(() => ({})) as {
@@ -91,7 +95,7 @@ export default function Chatbot() {
         const erro = response.status === 429 && data.erro === 'limite'
           ? 'Muitas perguntas seguidas. Tente de novo em alguns minutos.'
           : 'Não consegui responder agora. Tente de novo em instantes.'
-        setMensagens([...historico, { papel: 'assistente', texto: erro }])
+        setMensagens([...historico, { papel: 'assistente', texto: erro, erro: true }])
         return
       }
 
@@ -109,6 +113,7 @@ export default function Chatbot() {
         {
           papel: 'assistente',
           texto: 'Não consegui responder agora. Tente de novo em instantes.',
+          erro: true,
         },
       ])
     } finally {
