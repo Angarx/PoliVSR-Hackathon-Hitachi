@@ -13,10 +13,10 @@ type Study = { audience: Audience; title: string; level?: string; summary: strin
 const tabs = [
   { id: 'about' as const, label: 'Quem Somos', icon: UsersRound },
   { id: 'data' as const, label: 'Pesquisas e Dados', icon: BarChart3 },
-  { id: 'simulator' as const, label: 'O Preço do Fixo', icon: CircleDollarSign },
+  { id: 'simulator' as const, label: 'O Custo do Fixo', icon: CircleDollarSign },
 ]
 
-const SimulatorPage = dynamic(() => import('@/components/custo-do-fixo'), { ssr: false })
+const SimulatorPage = dynamic(() => import('@/components/calculadora-embed'), { ssr: false })
 
 const curvePoints = [...VERAO, VERAO[0]]
 const Lmax = Math.max(...curvePoints)
@@ -222,7 +222,6 @@ function WindingRoadmapSection() {
         <p className="mt-3 text-xs font-bold uppercase tracking-[.25em] text-red-600">Próximos passos</p>
       </header>
       <div className="relative mx-auto mt-12 max-w-5xl pl-16 lg:pl-0">
-        <div className="absolute bottom-6 left-6 top-6 z-0 border-l-[3px] border-dashed border-red-300 lg:hidden" aria-hidden="true" />
         <svg className="pointer-events-none absolute inset-x-0 top-0 hidden h-full w-full overflow-visible lg:block" viewBox={`0 0 1000 ${phases.length * rowHeight}`} preserveAspectRatio="none" aria-hidden="true">
           <path d={roadmapPath} fill="none" stroke="#e60000" strokeDasharray="2 14" strokeLinecap="round" strokeWidth="6" vectorEffect="non-scaling-stroke" />
         </svg>
@@ -241,7 +240,10 @@ function WindingRoadmapSection() {
               : next
                 ? 'bg-white text-red-600 ring-4 ring-red-200'
                 : 'bg-white text-slate-500 ring-2 ring-slate-200'
+            const last = phase.number === phases[phases.length - 1].number
             return <article key={phase.number} className={`relative -ml-16 flex min-h-0 items-start pl-16 lg:ml-0 lg:h-[300px] lg:items-center lg:pl-0 ${right ? 'lg:justify-end' : 'lg:justify-start'}`}>
+              {/* Linha tracejada do celular: liga o centro deste marcador ao do próximo (24px de espaço + 44px até o centro), sem passar da última etapa. */}
+              {!last && <div className="absolute -bottom-[68px] left-6 top-11 z-0 border-l-[3px] border-dashed border-red-300 lg:hidden" aria-hidden="true" />}
               <div className="absolute left-0 top-5 z-20 size-12 lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2" aria-hidden="true">
                 {next && <span className="absolute inset-0 rounded-full bg-red-200/70 animate-ping motion-reduce:animate-none" />}
                 <span className={`relative z-10 grid size-12 place-items-center rounded-full border-4 border-gray-50 text-lg font-black shadow-md ${nodeClass}`}>
@@ -304,6 +306,8 @@ function WindingRoadmapSection() {
   </section>
 }
 
+const CONTATO_EMAIL = 'pesquisa@polivsr.usp.br'
+
 function ContactSection() {
   const [sent, setSent] = useState(false)
   const timerRef = useRef<number | null>(null)
@@ -314,13 +318,13 @@ function ContactSection() {
 
   return <section className="bg-gray-950 px-6 py-24 text-white">
     <div className="mx-auto max-w-5xl">
-      <h2 className="mb-4 text-4xl font-bold">Traga a estabilidade do VSR para a sua concessão.</h2>
-      <p className="mb-12 max-w-3xl text-lg text-gray-400">O grupo de pesquisa PoliVSR atua na modelagem técnica e comercial de Variable Shunt Reactors no SIN. Se a sua transmissora enfrenta elevados custos com desgaste mecânico e sobretensões na carga leve, apoie a criação deste laboratório. Mapeamos, de forma acadêmica, a viabilidade operacional de mitigar o OPEX invisível na sua concessão.</p>
+      <h2 className="mb-4 text-4xl font-bold">Vamos estudar o VSR na sua concessão</h2>
+      <p className="mb-12 max-w-3xl text-lg text-gray-400">Se a sua transmissora vai instalar reatores de derivação, comparamos o VSR e os reatores fixos com os dados da sua subestação. Um VSR pode substituir dois bancos fixos e economizar um vão de manobra. Entre em contato para estudarmos o seu caso.</p>
       <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
         <div className="flex flex-col gap-6 text-gray-300">
           <p><strong className="text-white">Projeto Conceitual:</strong> Hackathon Hitachi Energy 2026</p>
           <p><strong className="text-white">Repositório do Projeto / Equipe:</strong> <a href="https://github.com/JPauloSar/PoliVSR-Hackathon-Hitachi" target="_blank" rel="noopener noreferrer" className="break-all underline underline-offset-4 hover:text-white">github.com/JPauloSar/PoliVSR-Hackathon-Hitachi</a></p>
-          <p><strong className="text-white">Email:</strong> pesquisa@polivsr.usp.br</p>
+          <p><strong className="text-white">Email:</strong> {CONTATO_EMAIL}</p>
           <p><strong className="text-white">Ambiente de Pesquisa:</strong> Poli-USP, São Paulo - SP</p>
           <p><strong className="text-white">Apoio e Fomento:</strong> Hitachi Energy HUB, Guarulhos - SP</p>
         </div>
