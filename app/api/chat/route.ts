@@ -94,11 +94,21 @@ function indicaContatoComEquipe(texto: string): boolean {
     || /\b(?:equipe|time)\b.{0,80}\b(?:pode|podera|consegue|vai)\b.{0,50}\b(?:ajudar|orientar|informar|esclarecer|atender)\b/.test(normalized)
 }
 
-function montarContexto(pergunta: string): string {
-  const encontrados = buscar(pergunta, knowledgeBase)
-  const candidatos = versaoVigente
-    ? [versaoVigente, ...encontrados.filter(trecho => trecho.id !== versaoVigente.id)]
-    : encontrados
+function semInformacao(texto: string): boolean {
+  const normalized = texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+  return /\b(?:nao (?:tenho|ha|encontrei|possuo|consta)|sem)\b.{0,40}\binformac/.test(normalized)
+}
+
+function montarContexto(perguntaAtual: string, perguntaAnterior?: string): string {
+  const atuais = buscar(perguntaAtual, knowledgeBase, 5)
+  const extras = perguntaAnterior
+    ? buscar(`${perguntaAtual} ${perguntaAnterior}`, knowledgeBase, 3)
+    : []
+  const candidatos = [...(versaoVigente ? [versaoVigente] : []), ...atuais, ...extras]
   const selecionados: Trecho[] = []
   const ids = new Set<string>()
   let totalTexto = 0
@@ -190,10 +200,7 @@ export async function POST(request: Request) {
   const userMessages = mensagens.filter(mensagem => mensagem.papel === 'usuario')
   const latestQuestion = userMessages.at(-1)?.texto ?? ''
   const previousQuestion = userMessages.at(-2)?.texto
-  const retrievalQuestion = previousQuestion
-    ? `${previousQuestion}\n${latestQuestion}`
-    : latestQuestion
-  const contexto = montarContexto(retrievalQuestion)
+  const contexto = montarContexto(latestQuestion, previousQuestion)
   const groqMessages = [
     { role: 'system' as const, content: montarPromptSistema(contexto) },
     ...mensagens.slice(-6).map(mensagem => ({
@@ -223,10 +230,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ resposta: FALLBACK_ANSWER, contato: true })
   }
 
-  const indicaContato = generated.includes(MARCA_CONTATO)
   const resposta = generated.replaceAll(MARCA_CONTATO, '').trim()
+  const faltaInformacao = semInformacao(resposta)
+  const indicaContato = indicaContatoComEquipe(resposta)
+  const respostaFinal = faltaInformacao && !indicaContato
+    ? `${resposta} Fale com a equipe PoliVSR.`
+    : resposta
   return NextResponse.json({
-    resposta: resposta || FALLBACK_ANSWER,
-    contato: (indicaContato && indicaContatoComEquipe(resposta)) || !resposta,
+    resposta: respostaFinal || FALLBACK_ANSWER,
+    contato: indicaContato || faltaInformacao || !resposta,
   })
 }
