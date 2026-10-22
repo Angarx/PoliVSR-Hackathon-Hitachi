@@ -72,6 +72,18 @@ function allowRequest(request: Request): boolean {
   return true
 }
 
+function parseGroqApiKeys(value: string | undefined): string[] {
+  const normalized = (value ?? '')
+    .trim()
+    .replace(/^["']+|["']+$/g, '')
+    .replace(/^GROQ_API_KEYS\s*=\s*/i, '')
+  const keys = normalized
+    .split(/[\s,;]+/)
+    .map(key => key.replace(/^["']+|["']+$/g, ''))
+    .filter(key => /^gsk_[A-Za-z0-9]+$/.test(key))
+  return [...new Set(keys)]
+}
+
 function indicaContatoComEquipe(texto: string): boolean {
   const normalized = texto
     .toLowerCase()
@@ -106,9 +118,11 @@ async function callGroq(
   keys: string[],
 ): Promise<Response | null> {
   const start = Math.floor(Math.random() * keys.length)
+  const failures: Array<{ keyIndex: number; status: number | 'timeout' | 'network' }> = []
 
   for (let attempt = 0; attempt < keys.length; attempt += 1) {
-    const key = keys[(start + attempt) % keys.length]
+    const keyIndex = (start + attempt) % keys.length
+    const key = keys[keyIndex]
     try {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -127,12 +141,26 @@ async function callGroq(
       })
 
       if (response.ok) return response
-      if (response.status !== 429 && response.status < 500) return null
-    } catch {
-      continue
+      failures.push({ keyIndex: keyIndex + 1, status: response.status })
+      if (
+        response.status < 500
+        && response.status !== 401
+        && response.status !== 403
+        && response.status !== 429
+      ) {
+        break
+      }
+    } catch (error) {
+      failures.push({
+        keyIndex: keyIndex + 1,
+        status: error instanceof Error && error.name === 'TimeoutError' ? 'timeout' : 'network',
+      })
     }
   }
 
+  for (const failure of failures) {
+    console.error(JSON.stringify({ model, key_index: failure.keyIndex, status: failure.status }))
+  }
   return null
 }
 
@@ -153,10 +181,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ erro: 'entrada_invalida' }, { status: 400 })
   }
 
-  const keys = (process.env.GROQ_API_KEYS ?? '')
-    .split(',')
-    .map(key => key.trim())
-    .filter(Boolean)
+  const keys = parseGroqApiKeys(process.env.GROQ_API_KEYS)
   if (!keys.length) {
     return NextResponse.json({ erro: 'sem_chave' }, { status: 500 })
   }
