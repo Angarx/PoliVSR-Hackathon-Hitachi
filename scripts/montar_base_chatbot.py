@@ -40,7 +40,7 @@ SOURCES = [
         "kind": "pdf",
     },
     {
-        "path": "hackathon/analise-concorrencia/Nasser/item3-consolidado.md",
+        "path": "../Hackathon-Hitachi/materiais/Nasser/analise_concorrencia/item3-consolidado.md",
         "fonte": "Análise de concorrência (consolidado)",
         "kind": "markdown",
     },
@@ -49,6 +49,42 @@ SOURCES = [
         "fonte": "Site PoliVSR",
         "kind": "markdown",
         "root": "repo",
+    },
+    {
+        "path": "ia/01_quem-somos.md",
+        "fonte": "Base curada PoliVSR (ia/)",
+        "kind": "markdown",
+        "peso": 1.5,
+    },
+    {
+        "path": "ia/02_o-problema-e-o-vsr.md",
+        "fonte": "Base curada PoliVSR (ia/)",
+        "kind": "markdown",
+        "peso": 1.5,
+    },
+    {
+        "path": "ia/03_calculadora-o-custo-do-fixo.md",
+        "fonte": "Base curada PoliVSR (ia/)",
+        "kind": "markdown",
+        "peso": 1.5,
+    },
+    {
+        "path": "ia/04_intencoes-sin-e-roadmap.md",
+        "fonte": "Base curada PoliVSR (ia/)",
+        "kind": "markdown",
+        "peso": 1.5,
+    },
+    {
+        "path": "ia/05_perguntas-frequentes.md",
+        "fonte": "Base curada PoliVSR (ia/)",
+        "kind": "markdown",
+        "peso": 1.5,
+    },
+    {
+        "path": "ia/06_glossario-e-numeros.md",
+        "fonte": "Base curada PoliVSR (ia/)",
+        "kind": "markdown",
+        "peso": 1.5,
     },
 ]
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "lib/chatbot/base.json"
@@ -182,9 +218,15 @@ def markdown_sections(text: str, file_path: Path, stop_before_heading: str | Non
     return sections
 
 
-def markdown_chunks(path: Path, fonte: str, source_index: int, stop_before_heading: str | None) -> list[dict[str, str]]:
+def markdown_chunks(
+    path: Path,
+    fonte: str,
+    source_index: int,
+    stop_before_heading: str | None,
+    peso: float | None = None,
+) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8")
-    chunks: list[dict[str, str]] = []
+    chunks: list[dict[str, Any]] = []
     section_index = 0
     for section_title, section_text in markdown_sections(text, path, stop_before_heading):
         cleaned_title = clean_markdown(section_title)
@@ -198,12 +240,15 @@ def markdown_chunks(path: Path, fonte: str, source_index: int, stop_before_headi
             title = cleaned_title
             if len(section_chunks) > 1:
                 title = f"{title} · Parte {chunk_index}"
-            chunks.append({
+            chunk = {
                 "id": f"{source_index}-{section_index}-{chunk_index}",
                 "titulo": title,
                 "fonte": fonte,
                 "texto": chunk_text,
-            })
+            }
+            if peso is not None:
+                chunk["peso"] = peso
+            chunks.append(chunk)
         section_index += 1
     return chunks
 
@@ -353,8 +398,8 @@ def pdf_paragraphs(path: Path) -> list[Paragraph]:
     return paragraphs
 
 
-def pdf_chunks(path: Path, fonte: str, source_index: int) -> list[dict[str, str]]:
-    chunks: list[dict[str, str]] = []
+def pdf_chunks(path: Path, fonte: str, source_index: int) -> list[dict[str, Any]]:
+    chunks: list[dict[str, Any]] = []
     for chunk_index, (chunk_text, page, heading) in enumerate(pack_paragraphs(pdf_paragraphs(path)), start=1):
         page_number = page or 1
         title = f"{heading} (p. {page_number})" if heading else f"{fonte}, p. {page_number}"
@@ -372,7 +417,7 @@ def main() -> None:
     parser.add_argument("dados_vsr", type=Path, help="Path to the read-only dados_VSR checkout")
     args = parser.parse_args()
     root = args.dados_vsr.expanduser().resolve()
-    base: list[dict[str, str]] = []
+    base: list[dict[str, Any]] = []
     counts: Counter[str] = Counter()
 
     for source_index, source in enumerate(SOURCES):
@@ -386,9 +431,10 @@ def main() -> None:
                 source["fonte"],
                 source_index,
                 source.get("stop_before_heading"),
+                source.get("peso"),
             )
         base.extend(chunks)
-        counts[source["fonte"]] = len(chunks)
+        counts[source["fonte"]] += len(chunks)
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(

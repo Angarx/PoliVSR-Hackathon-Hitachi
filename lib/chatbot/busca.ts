@@ -3,6 +3,7 @@ export type Trecho = {
   titulo: string
   fonte: string
   texto: string
+  peso?: number
 }
 
 const stopwords = new Set([
@@ -68,7 +69,7 @@ export function buscar(pergunta: string, base: Trecho[], k = 6): Trecho[] {
       const lengthNormalization = 1.2 * (1 - 0.75 + 0.75 * document.tokens.length / averageLength)
       score += inverseFrequency * (frequency * 2.2) / (frequency + lengthNormalization)
     }
-    return { trecho: document.trecho, score, index }
+    return { trecho: document.trecho, score: score * (document.trecho.peso ?? 1), index }
   })
     .filter(item => item.score > 0)
     .sort((left, right) => right.score - left.score || left.index - right.index)
