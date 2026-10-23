@@ -2269,73 +2269,199 @@
     "peso": 1.5
   },
   {
-    "id": "10-0-1",
-    "titulo": "05perguntas-frequentes",
-    "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "Perguntas frequentes\n\nRespostas curtas. Para detalhes, ver os arquivos 02 (física), 03 (calculadora) e 04 (intenções e roadmap).",
-    "peso": 1.5
-  },
-  {
     "id": "10-1-1",
-    "titulo": "Sobre o projeto",
+    "titulo": "O que é o PoliVSR?",
     "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "1. O que é o PoliVSR?\nUm projeto de pesquisa aplicada de estudantes da Poli-USP que compara, com dados públicos, o VSR (reator de ajuste contínuo) com os reatores fixos usados hoje no SIN. Nasceu no Hackathon Hitachi Energy 2026 e tem apoio e fomento da Hitachi Energy.\n\n2. Quem faz parte do grupo?\nNasser, João Paulo Saraiva e Raphael Dopaso, estudantes da Escola Politécnica da USP.\n\n3. Vocês são imparciais, se a Hitachi fabrica VSR?\nO projeto é transparente sobre a origem: nasceu num hackathon da Hitachi Energy, fabricante de VSR. Por isso usamos só dados públicos (92 arquivos do ONS, da ANEEL e do Banco Central), declaramos todas as premissas e publicamos os scripts que refazem os números. O modelo cobra do VSR os custos e riscos dele e mostra onde ele não compensa.\n\n4. Onde estão os dados?\nNo repositório público https://github.com/LordiMil/dadosVSR: arquivos brutos com endereço, data de acesso e impressão digital (SHA-256), scripts, resultados e a planilha-mestre.",
+    "texto": "O que é o PoliVSR?\n\nUm projeto de pesquisa aplicada de estudantes da Poli-USP que compara, com dados públicos, o VSR (reator de ajuste contínuo) com os reatores fixos usados hoje no SIN. Nasceu no Hackathon Hitachi Energy 2026 e tem apoio e fomento da Hitachi Energy.",
     "peso": 1.5
   },
   {
     "id": "10-2-1",
-    "titulo": "Sobre o problema e o VSR · Parte 1",
+    "titulo": "Quem faz parte do grupo?",
     "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "5. Por que a tensão sobe na rede?\nLinhas de transmissão geram potência reativa o tempo todo. Quando passa pouca energia por elas, sobra reativo e a tensão sobe. Com a energia solar nos telhados, a rede fica leve no meio do dia, e isso acontece com mais frequência.\n\n6. O que é a curva de pato?\nO formato da carga líquida ao longo do dia: afunda ao meio-dia, quando a solar cobre boa parte do consumo, e sobe com força no fim da tarde. Em setembro de 2026, a média do SIN foi de 36,8 GW às 12h a 77,3 GW às 18h30 (ONS).\n\n7. O que é um reator fixo e qual o problema dele?\nÉ o equipamento que absorve o reativo em excesso. Ele só liga ou desliga, e quem faz isso é o disjuntor. Desligar reator é um trabalho pesado: o disjuntor de reator tem cerca de dez vezes mais falhas graves que um disjuntor de linha (2,46 contra 0,25 por 100 disjuntores por ano, CIGRÉ).\n\n8. O que é o VSR?\nUm reator com comutador sob carga, que ajusta a potência em pequenos passos sem desligar. O fixo é um interruptor; o VSR é um dimmer.",
-    "peso": 1.5
-  },
-  {
-    "id": "10-2-2",
-    "titulo": "Sobre o problema e o VSR · Parte 2",
-    "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "9. O VSR substitui o reator fixo um por um?\nNão. A aplicação que compensa é a 2:1: um VSR com o dobro da potência substitui dois reatores fixos (um que fica sempre ligado e um que entra e sai) e dispensa um vão inteiro na subestação. No 1:1, o VSR ainda precisaria sair pelo disjuntor cerca de uma vez por dia e não economizaria vão.\n\n10. Por que seis VSRs no corredor Norte–Nordeste, e não um só?\nA sobra de reativo do corredor varia cerca de 944 Mvar ao longo do dia, o que equivale a 6 reatores manobráveis de 150 Mvar. No 2:1, 12 reatores fixos viram 6 VSRs de 300 Mvar. Um VSR só precisaria de cerca de 1.900 Mvar (ele regula só de 50% a 100% da própria potência), ficaria num lugar só e concentraria todo o risco.\n\n11. O VSR substitui STATCOM, SVC ou compensador síncrono?\nNão. Esses equipamentos respondem em segundos e servem para contingências. O VSR, cujo comutador leva minutos, cuida das variações lentas, de horas a dias, por um custo menor. São complementares.",
-    "peso": 1.5
-  },
-  {
-    "id": "10-2-3",
-    "titulo": "Sobre o problema e o VSR · Parte 3",
-    "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "12. Já existe VSR no Brasil?\nNenhum fabricante tem VSR instalado no Brasil. No exterior, a Hitachi Energy tem VSRs na Noruega desde 2012 e entregou um de 500 kV no Uzbequistão em 2024; Siemens Energy e GE Vernova também venderam VSRs na Europa.",
+    "texto": "Quem faz parte do grupo?\n\nNasser, João Paulo Saraiva e Raphael Dopaso, estudantes da Escola Politécnica da USP.",
     "peso": 1.5
   },
   {
     "id": "10-3-1",
-    "titulo": "Sobre a calculadora e os resultados · Parte 1",
+    "titulo": "Vocês são imparciais, se a Hitachi fabrica VSR?",
     "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "13. O que a calculadora calcula?\nSe, numa subestação que precisaria de dois reatores fixos, compensa instalar um VSR. Ela compara 30 anos de custos das duas alternativas e mostra o ganho do VSR em valor presente, a chance de compensar e até que preço o VSR vale a pena.\n\n14. Quanto o VSR economiza?\nNo caso-base, na visão da transmissora, o ganho mediano em 30 anos é de R$ 8,6 mi no Campo (500 kV), R$ 8,4 mi no Polo eólico (500 kV) e R$ 3,6 mi no Centro Urbano (230 kV), com chance de compensar de 96% a 99%. São resultados de modelo, não garantias.\n\n15. Por que o payback é imediato?\nPorque, a 500 kV, um VSR com um vão (R$ 55,55 mi) já custa menos que dois reatores fixos com duas fases reserva e dois vãos (R$ 61,97 mi). O VSR custa 58% a mais que os dois reatores, mas o vão e as fases reserva evitados pagam essa diferença.\n\n16. De onde vem o preço do VSR?\nDe contratos públicos de operadores europeus (Litgrid, 2026; Energinet com GE Vernova, 2025), escalados para 500 kV e 300 Mvar e convertidos pelo câmbio do Banco Central. O caso-base é R$ 42,5 mi, numa faixa de R$ 37 a 50 mi. É a maior incerteza do modelo; o VSR compensa até R$ 51,1 mi no Campo.",
-    "peso": 1.5
-  },
-  {
-    "id": "10-3-2",
-    "titulo": "Sobre a calculadora e os resultados · Parte 2",
-    "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "17. O que é o Monte Carlo e por que 4.000 simulações?\nO modelo sorteia 4.000 futuros possíveis (falhas de disjuntor e de reator, vida útil, custos e prazos de reparo) e calcula o resultado em cada um. Assim mostra não só o resultado mais provável, mas a faixa de resultados e a chance de o VSR compensar. Com 4.000, o erro estatístico na chance de compensar fica em cerca de ±0,3 ponto percentual.\n\n18. O que são P10, P50 e P90?\nO P50 é a mediana: metade das simulações deu mais, metade deu menos. O P10 é um caso pessimista (só 10% das simulações deram menos) e o P90, um otimista (só 10% deram mais).\n\n19. O VSR também falha. Isso está na conta?\nSim. A falha grave do VSR é sorteada com a taxa de um reator (0,30% a 0,53% por ano). Como o VSR não tem fase reserva, ele fica fora por meses (mediana de 180 dias), com multa por indisponibilidade. É isso que produz as poucas simulações em que ele perde.\n\n20. As perdas do VSR, que fica sempre ligado, anulam o ganho?\nNão. Elas entram na visão do sistema: cerca de R$ 0,55 mi em valor presente no Campo, contra um ganho de R$ 9,1 mi nessa visão.",
-    "peso": 1.5
-  },
-  {
-    "id": "10-3-3",
-    "titulo": "Sobre a calculadora e os resultados · Parte 3",
-    "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "21. Vocês ajustaram o modelo para o VSR ganhar?\nNão. Nenhum parâmetro do modelo físico foi ajustado, e mesmo assim as manobras batem com a realidade: 0,53 manobra por dia por reator no modelo, contra 0,48 medida. Onde havia escolha, usamos a premissa mais favorável ao VSR que se sustenta e testamos a contrária.\n\n22. Por que duas taxas de desconto?\nA transmissora usa o custo de capital regulatório da ANEEL para transmissão em 2026, 12,11% ao ano antes de impostos. O sistema usa a taxa social de desconto oficial, 8,5% ao ano. Como o maior ganho está no dia da compra, a taxa pesa pouco: de 8% a 14%, o ganho no Campo vai de R$ 9,2 a 8,0 mi.",
+    "texto": "Vocês são imparciais, se a Hitachi fabrica VSR?\n\nO projeto é transparente sobre a origem: nasceu num hackathon da Hitachi Energy, fabricante de VSR. Por isso usamos só dados públicos (92 arquivos do ONS, da ANEEL e do Banco Central), declaramos todas as premissas e publicamos os scripts que refazem os números. O modelo cobra do VSR os custos e riscos dele e mostra onde ele não compensa.",
     "peso": 1.5
   },
   {
     "id": "10-4-1",
-    "titulo": "Onde o VSR não compensa",
+    "titulo": "Onde estão os dados?",
     "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "23. O VSR sempre vale a pena?\nNão. Pelo modelo, ele não compensa na troca de um reator antigo (o vão já existe), numa subestação com um só reator, ou se o preço voltar ao nível de 2023 (R$ 80 a 86 mi, ganho de −R$ 30 a −35 mi). Também perde se cada três VSRs exigirem um VSR inteiro de reserva (−R$ 5,6 mi no Campo). O foco é a obra nova com dois bancos de reator.\n\n24. E nas obras de reforço?\nPara a transmissora, não compensa hoje (−R$ 4,4 mi no Campo, 5% de chance), porque a receita é calculada pelo Banco de Preços da ANEEL, que não tem VSR, e ela deixa de receber pelo vão que não constrói. Para o sistema, continua vantajoso. Por isso propomos incluir o VSR no Banco de Preços.\n\n25. E se o comutador for a óleo, e não a vácuo?\nO ganho no Campo cai de R$ 8,6 mi para cerca de R$ 1,1 mi (61% de chance), porque o comutador a óleo pede manutenção muito mais cedo. O comutador a vácuo, que é o padrão em VSR, só pede revisão a cada 300 mil operações (8 a 9 anos).",
+    "texto": "Onde estão os dados?\n\nNo repositório público https://github.com/LordiMil/dadosVSR: arquivos brutos com endereço, data de acesso e impressão digital (SHA-256), scripts, resultados e a planilha-mestre.",
     "peso": 1.5
   },
   {
     "id": "10-5-1",
-    "titulo": "Sobre o futuro e o contato",
+    "titulo": "Por que a tensão sobe na rede?",
     "fonte": "Base curada PoliVSR (ia/)",
-    "texto": "26. Quais os próximos passos do PoliVSR?\nMapa de oportunidades (0 a 6 meses), medição com transmissoras (cerca de 1 ano), estudo de caso real, piloto em campo (opcional) e a proposta de incluir o VSR no Banco de Preços da ANEEL. Ver o roadmap no arquivo 04.\n\n27. Minha transmissora pode usar isso?\nSim. Pelo formulário \"Vamos estudar o VSR na sua concessão\", no fim da página inicial, o grupo compara o VSR e os reatores fixos com os dados da sua subestação.\n\n28. Posso reproduzir os números?\nSim. O repositório https://github.com/LordiMil/dadosVSR tem os arquivos brutos, os scripts que refazem os resultados e a planilha-mestre.",
+    "texto": "Por que a tensão sobe na rede?\n\nLinhas de transmissão geram potência reativa o tempo todo. Quando passa pouca energia por elas, sobra reativo e a tensão sobe. Com a energia solar nos telhados, a rede fica leve no meio do dia, e isso acontece com mais frequência.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-6-1",
+    "titulo": "O que é a curva de pato?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O que é a curva de pato?\n\nO formato da carga líquida ao longo do dia: afunda ao meio-dia, quando a solar cobre boa parte do consumo, e sobe com força no fim da tarde. Em setembro de 2026, a média do SIN foi de 36,8 GW às 12h a 77,3 GW às 18h30 (ONS).",
+    "peso": 1.5
+  },
+  {
+    "id": "10-7-1",
+    "titulo": "O que é um reator fixo e qual o problema dele?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O que é um reator fixo e qual o problema dele?\n\nÉ o equipamento que absorve o reativo em excesso. Ele só liga ou desliga, e quem faz isso é o disjuntor. Desligar reator é um trabalho pesado: o disjuntor de reator tem cerca de dez vezes mais falhas graves que um disjuntor de linha (2,46 contra 0,25 por 100 disjuntores por ano, CIGRÉ).",
+    "peso": 1.5
+  },
+  {
+    "id": "10-8-1",
+    "titulo": "O que é o VSR?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O que é o VSR?\n\nUm reator com comutador sob carga, que ajusta a potência em pequenos passos sem desligar. O fixo é um interruptor; o VSR é um dimmer.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-9-1",
+    "titulo": "O VSR substitui o reator fixo um por um?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O VSR substitui o reator fixo um por um?\n\nNão. A aplicação que compensa é a 2:1: um VSR com o dobro da potência substitui dois reatores fixos (um que fica sempre ligado e um que entra e sai) e dispensa um vão inteiro na subestação. No 1:1, o VSR ainda precisaria sair pelo disjuntor cerca de uma vez por dia e não economizaria vão.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-10-1",
+    "titulo": "Por que seis VSRs no corredor Norte–Nordeste, e não um só?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Por que seis VSRs no corredor Norte–Nordeste, e não um só?\n\nA sobra de reativo do corredor varia cerca de 944 Mvar ao longo do dia, o que equivale a 6 reatores manobráveis de 150 Mvar. No 2:1, 12 reatores fixos viram 6 VSRs de 300 Mvar. Um VSR só precisaria de cerca de 1.900 Mvar (ele regula só de 50% a 100% da própria potência), ficaria num lugar só e concentraria todo o risco.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-11-1",
+    "titulo": "O VSR substitui STATCOM, SVC ou compensador síncrono?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O VSR substitui STATCOM, SVC ou compensador síncrono?\n\nNão. Esses equipamentos respondem em segundos e servem para contingências. O VSR, cujo comutador leva minutos, cuida das variações lentas, de horas a dias, por um custo menor. São complementares.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-12-1",
+    "titulo": "Já existe VSR no Brasil?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Já existe VSR no Brasil?\n\nNenhum fabricante tem VSR instalado no Brasil. No exterior, a Hitachi Energy tem VSRs na Noruega desde 2012 e entregou um de 500 kV no Uzbequistão em 2024; Siemens Energy e GE Vernova também venderam VSRs na Europa.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-13-1",
+    "titulo": "O que a calculadora calcula?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O que a calculadora calcula?\n\nSe, numa subestação que precisaria de dois reatores fixos, compensa instalar um VSR. Ela compara 30 anos de custos das duas alternativas e mostra o ganho do VSR em valor presente, a chance de compensar e até que preço o VSR vale a pena.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-14-1",
+    "titulo": "Quanto o VSR economiza?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Quanto o VSR economiza?\n\nNo caso-base, na visão da transmissora, o ganho mediano em 30 anos é de R$ 8,6 mi no Campo (500 kV), R$ 8,4 mi no Polo eólico (500 kV) e R$ 3,6 mi no Centro Urbano (230 kV), com chance de compensar de 96% a 99%. São resultados de modelo, não garantias.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-15-1",
+    "titulo": "Por que o payback é imediato?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Por que o payback é imediato?\n\nPorque, a 500 kV, um VSR com um vão (R$ 55,55 mi) já custa menos que dois reatores fixos com duas fases reserva e dois vãos (R$ 61,97 mi). O VSR custa 58% a mais que os dois reatores, mas o vão e as fases reserva evitados pagam essa diferença.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-16-1",
+    "titulo": "De onde vem o preço do VSR?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "De onde vem o preço do VSR?\n\nDe contratos públicos de operadores europeus (Litgrid, 2026; Energinet com GE Vernova, 2025), escalados para 500 kV e 300 Mvar e convertidos pelo câmbio do Banco Central. O caso-base é R$ 42,5 mi, numa faixa de R$ 37 a 50 mi. É a maior incerteza do modelo; o VSR compensa até R$ 51,1 mi no Campo.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-17-1",
+    "titulo": "O que é o Monte Carlo e por que 4.000 simulações?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O que é o Monte Carlo e por que 4.000 simulações?\n\nO modelo sorteia 4.000 futuros possíveis (falhas de disjuntor e de reator, vida útil, custos e prazos de reparo) e calcula o resultado em cada um. Assim mostra não só o resultado mais provável, mas a faixa de resultados e a chance de o VSR compensar. Com 4.000, o erro estatístico na chance de compensar fica em cerca de ±0,3 ponto percentual.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-18-1",
+    "titulo": "O que são P10, P50 e P90?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O que são P10, P50 e P90?\n\nO P50 é a mediana: metade das simulações deu mais, metade deu menos. O P10 é um caso pessimista (só 10% das simulações deram menos) e o P90, um otimista (só 10% deram mais).",
+    "peso": 1.5
+  },
+  {
+    "id": "10-19-1",
+    "titulo": "O VSR também falha. Isso está na conta?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O VSR também falha. Isso está na conta?\n\nSim. A falha grave do VSR é sorteada com a taxa de um reator (0,30% a 0,53% por ano). Como o VSR não tem fase reserva, ele fica fora por meses (mediana de 180 dias), com multa por indisponibilidade. É isso que produz as poucas simulações em que ele perde.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-20-1",
+    "titulo": "As perdas do VSR, que fica sempre ligado, anulam o ganho?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "As perdas do VSR, que fica sempre ligado, anulam o ganho?\n\nNão. Elas entram na visão do sistema: cerca de R$ 0,55 mi em valor presente no Campo, contra um ganho de R$ 9,1 mi nessa visão.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-21-1",
+    "titulo": "Vocês ajustaram o modelo para o VSR ganhar?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Vocês ajustaram o modelo para o VSR ganhar?\n\nNão. Nenhum parâmetro do modelo físico foi ajustado, e mesmo assim as manobras batem com a realidade: 0,53 manobra por dia por reator no modelo, contra 0,48 medida. Onde havia escolha, usamos a premissa mais favorável ao VSR que se sustenta e testamos a contrária.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-22-1",
+    "titulo": "Por que duas taxas de desconto?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Por que duas taxas de desconto?\n\nA transmissora usa o custo de capital regulatório da ANEEL para transmissão em 2026, 12,11% ao ano antes de impostos. O sistema usa a taxa social de desconto oficial, 8,5% ao ano. Como o maior ganho está no dia da compra, a taxa pesa pouco: de 8% a 14%, o ganho no Campo vai de R$ 9,2 a 8,0 mi.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-23-1",
+    "titulo": "O VSR sempre vale a pena?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "O VSR sempre vale a pena?\n\nNão. Pelo modelo, ele não compensa na troca de um reator antigo (o vão já existe), numa subestação com um só reator, ou se o preço voltar ao nível de 2023 (R$ 80 a 86 mi, ganho de −R$ 30 a −35 mi). Também perde se cada três VSRs exigirem um VSR inteiro de reserva (−R$ 5,6 mi no Campo). O foco é a obra nova com dois bancos de reator.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-24-1",
+    "titulo": "E nas obras de reforço?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "E nas obras de reforço?\n\nPara a transmissora, não compensa hoje (−R$ 4,4 mi no Campo, 5% de chance), porque a receita é calculada pelo Banco de Preços da ANEEL, que não tem VSR, e ela deixa de receber pelo vão que não constrói. Para o sistema, continua vantajoso. Por isso propomos incluir o VSR no Banco de Preços.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-25-1",
+    "titulo": "E se o comutador for a óleo, e não a vácuo?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "E se o comutador for a óleo, e não a vácuo?\n\nO ganho no Campo cai de R$ 8,6 mi para cerca de R$ 1,1 mi (61% de chance), porque o comutador a óleo pede manutenção muito mais cedo. O comutador a vácuo, que é o padrão em VSR, só pede revisão a cada 300 mil operações (8 a 9 anos).",
+    "peso": 1.5
+  },
+  {
+    "id": "10-26-1",
+    "titulo": "Quais os próximos passos do PoliVSR?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Quais os próximos passos do PoliVSR?\n\nMapa de oportunidades (0 a 6 meses), medição com transmissoras (cerca de 1 ano), estudo de caso real, piloto em campo (opcional) e a proposta de incluir o VSR no Banco de Preços da ANEEL. Ver o roadmap no arquivo 04.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-27-1",
+    "titulo": "Minha transmissora pode usar isso?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Minha transmissora pode usar isso?\n\nSim. Pelo formulário \"Vamos estudar o VSR na sua concessão\", no fim da página inicial, o grupo compara o VSR e os reatores fixos com os dados da sua subestação.",
+    "peso": 1.5
+  },
+  {
+    "id": "10-28-1",
+    "titulo": "Posso reproduzir os números?",
+    "fonte": "Base curada PoliVSR (ia/)",
+    "texto": "Posso reproduzir os números?\n\nSim. O repositório https://github.com/LordiMil/dadosVSR tem os arquivos brutos, os scripts que refazem os resultados e a planilha-mestre.",
     "peso": 1.5
   },
   {

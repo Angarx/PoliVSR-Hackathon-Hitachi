@@ -79,6 +79,7 @@ SOURCES = [
         "fonte": "Base curada PoliVSR (ia/)",
         "kind": "markdown",
         "peso": 1.5,
+        "split_faq": True,
     },
     {
         "path": "ia/06_glossario-e-numeros.md",
@@ -224,8 +225,39 @@ def markdown_chunks(
     source_index: int,
     stop_before_heading: str | None,
     peso: float | None = None,
+    split_faq: bool = False,
 ) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8")
+    if split_faq:
+        questions = list(re.finditer(r"(?m)^[ \t]*\*\*(\d+)\.[ \t]+(.+?)\*\*[ \t]*$", text))
+        section_headings = [
+            match.start()
+            for match in re.finditer(r"(?m)^##[ \t]+", text)
+        ]
+        chunks: list[dict[str, Any]] = []
+        for question_index, match in enumerate(questions, start=1):
+            next_boundaries = [
+                boundary
+                for boundary in (
+                    questions[question_index].start() if question_index < len(questions) else None,
+                    next((heading for heading in section_headings if heading > match.start()), None),
+                )
+                if boundary is not None
+            ]
+            end = min(next_boundaries, default=len(text))
+            title = clean_markdown(match.group(2)).strip()
+            answer = clean_markdown(text[match.end():end]).strip()
+            chunk = {
+                "id": f"{source_index}-{question_index}-1",
+                "titulo": title,
+                "fonte": fonte,
+                "texto": f"{title}\n\n{answer}" if answer else title,
+            }
+            if peso is not None:
+                chunk["peso"] = peso
+            chunks.append(chunk)
+        return chunks
+
     chunks: list[dict[str, Any]] = []
     section_index = 0
     for section_title, section_text in markdown_sections(text, path, stop_before_heading):
@@ -432,6 +464,7 @@ def main() -> None:
                 source_index,
                 source.get("stop_before_heading"),
                 source.get("peso"),
+                source.get("split_faq", False),
             )
         base.extend(chunks)
         counts[source["fonte"]] += len(chunks)
