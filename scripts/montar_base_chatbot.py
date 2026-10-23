@@ -40,11 +40,6 @@ SOURCES = [
         "kind": "pdf",
     },
     {
-        "path": "../Hackathon-Hitachi/materiais/Nasser/analise_concorrencia/item3-consolidado.md",
-        "fonte": "Análise de concorrência (consolidado)",
-        "kind": "markdown",
-    },
-    {
         "path": "lib/chatbot/site.md",
         "fonte": "Site PoliVSR",
         "kind": "markdown",
@@ -55,24 +50,28 @@ SOURCES = [
         "fonte": "Base curada PoliVSR (ia/)",
         "kind": "markdown",
         "peso": 1.5,
+        "filter_competitors": True,
     },
     {
         "path": "ia/02_o-problema-e-o-vsr.md",
         "fonte": "Base curada PoliVSR (ia/)",
         "kind": "markdown",
         "peso": 1.5,
+        "filter_competitors": True,
     },
     {
         "path": "ia/03_calculadora-o-custo-do-fixo.md",
         "fonte": "Base curada PoliVSR (ia/)",
         "kind": "markdown",
         "peso": 1.5,
+        "filter_competitors": True,
     },
     {
         "path": "ia/04_intencoes-sin-e-roadmap.md",
         "fonte": "Base curada PoliVSR (ia/)",
         "kind": "markdown",
         "peso": 1.5,
+        "filter_competitors": True,
     },
     {
         "path": "ia/05_perguntas-frequentes.md",
@@ -80,15 +79,39 @@ SOURCES = [
         "kind": "markdown",
         "peso": 1.5,
         "split_faq": True,
+        "filter_competitors": True,
     },
     {
         "path": "ia/06_glossario-e-numeros.md",
         "fonte": "Base curada PoliVSR (ia/)",
         "kind": "markdown",
         "peso": 1.5,
+        "filter_competitors": True,
     },
 ]
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "lib/chatbot/base.json"
+COMPETITOR_NAME_RE = re.compile(
+    r"\b(?:Siemens|Vernova|General Electric|Hyundai|CHINT|Trench|Toshiba|Hyosung|Kon[cč]ar|Reinhausen|Maschinenfabrik|Mitsubishi|TBEA)\b",
+    re.IGNORECASE,
+)
+COMPETITOR_ACRONYM_RE = re.compile(r"\b(?:GE|WEG|ABB|BTW)\b")
+
+
+def remove_competitor_sentences(text: str) -> str:
+    paragraphs = re.split(r"\n\s*\n", text)
+    filtered_paragraphs = []
+    for paragraph in paragraphs:
+        sentences = re.split(r"(?<=[.!?])\s+", paragraph)
+        remaining = [
+            sentence.strip()
+            for sentence in sentences
+            if sentence.strip()
+            and not COMPETITOR_NAME_RE.search(sentence)
+            and not COMPETITOR_ACRONYM_RE.search(sentence)
+        ]
+        if remaining:
+            filtered_paragraphs.append(" ".join(remaining))
+    return "\n\n".join(filtered_paragraphs)
 
 
 @dataclass
@@ -226,6 +249,7 @@ def markdown_chunks(
     stop_before_heading: str | None,
     peso: float | None = None,
     split_faq: bool = False,
+    filter_competitors: bool = False,
 ) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8")
     if split_faq:
@@ -253,6 +277,8 @@ def markdown_chunks(
                 "fonte": fonte,
                 "texto": f"{title}\n\n{answer}" if answer else title,
             }
+            if filter_competitors:
+                chunk["texto"] = remove_competitor_sentences(chunk["texto"])
             if peso is not None:
                 chunk["peso"] = peso
             chunks.append(chunk)
@@ -269,6 +295,10 @@ def markdown_chunks(
         ]
         section_chunks = pack_paragraphs(paragraphs)
         for chunk_index, (chunk_text, _, _) in enumerate(section_chunks, start=1):
+            if filter_competitors:
+                chunk_text = remove_competitor_sentences(chunk_text)
+                if not chunk_text:
+                    continue
             title = cleaned_title
             if len(section_chunks) > 1:
                 title = f"{title} · Parte {chunk_index}"
@@ -465,6 +495,7 @@ def main() -> None:
                 source.get("stop_before_heading"),
                 source.get("peso"),
                 source.get("split_faq", False),
+                source.get("filter_competitors", False),
             )
         base.extend(chunks)
         counts[source["fonte"]] += len(chunks)
