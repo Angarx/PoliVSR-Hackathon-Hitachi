@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import base from '@/lib/chatbot/base.json'
 import { buscar, formatarContexto, type Trecho } from '@/lib/chatbot/busca'
-import { MARCA_CONTATO, montarPromptSistema } from '@/lib/chatbot/prompt'
+import {
+  MARCA_CONTATO,
+  montarPromptSistema,
+  RESPOSTA_FORA_DO_ESCOPO,
+} from '@/lib/chatbot/prompt'
 
 export const runtime = 'nodejs'
 
@@ -27,12 +31,36 @@ const requestBuckets = new Map<string, RequestBucket>()
 const RATE_LIMIT = 20
 const RATE_WINDOW_MS = 10 * 60 * 1000
 const FALLBACK_ANSWER = 'Não consegui responder agora. Fale com a equipe PoliVSR.'
+const FALLBACK_SEM_CONCORRENTES = 'O PoliVSR estuda o VSR da Hitachi Energy. Para outras dúvidas, fale com a equipe.'
 const MAX_CONTEXT_TEXT_CHARS = 7000
 const knowledgeBase = base as Trecho[]
 const versaoVigente = knowledgeBase.find(trecho => trecho.titulo === 'Versão vigente')
+const CONCORRENTES_NOMES = /\b(?:Siemens|Vernova|General Electric|Hyundai|CHINT|Trench|Toshiba|Hyosung|Kon[cč]ar|Reinhausen|Maschinenfabrik|Mitsubishi|TBEA)\b/iu
+const CONCORRENTES_SIGLAS = /\b(?:GE|WEG|ABB|BTW)\b/u
+const PEDIDOS_CRIATIVOS = /\b(poemas?|poesias?|piadas?|m[uú]sicas?|rap|can[cç][aã]o|conto|hist[oó]rinha|roteiro|finja|encene|interprete|como se (?:fosse|voc[eê] fosse)|personagens?|my little|pon[e]?y|pok[eé]mon|marvel|disney|harry potter|anime)\b/iu
+const PEDIDO_ANALOGIA_COM_TEMA = /\banalogia\s+(?:a|à|ao|com|usando|de|do|da|sobre|envolvendo|no estilo)\s+(?!(?:(?:a|o|as|os|um|uma)\s+)?(?:espuma|chope|cerveja)\b)\S/iu
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function corrigirNomes(texto: string): string {
+  return texto.replace(/\bHit[a-zà-ü]*/giu, palavra =>
+    palavra.length >= 5 && palavra.toLowerCase() !== 'hitachi' ? 'Hitachi' : palavra,
+  )
+}
+
+function removerConcorrentes(texto: string): string {
+  return texto
+    .split(/(?<=[.!?])\s+/)
+    .filter(frase => !CONCORRENTES_NOMES.test(frase) && !CONCORRENTES_SIGLAS.test(frase))
+    .join(' ')
+    .trim()
+}
+
+function deveRecusarPedidoCriativo(pergunta: string): boolean {
+  return PEDIDOS_CRIATIVOS.test(pergunta)
+    || (/\banalogia\b/iu.test(pergunta) && PEDIDO_ANALOGIA_COM_TEMA.test(pergunta))
 }
 
 function validateMessages(value: unknown): Mensagem[] | null {
@@ -199,6 +227,9 @@ export async function POST(request: Request) {
 
   const userMessages = mensagens.filter(mensagem => mensagem.papel === 'usuario')
   const latestQuestion = userMessages.at(-1)?.texto ?? ''
+  if (deveRecusarPedidoCriativo(latestQuestion)) {
+    return NextResponse.json({ resposta: RESPOSTA_FORA_DO_ESCOPO, contato: false })
+  }
   const previousQuestion = userMessages.at(-2)?.texto
   const contexto = montarContexto(latestQuestion, previousQuestion)
   const groqMessages = [
@@ -230,14 +261,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ resposta: FALLBACK_ANSWER, contato: true })
   }
 
-  const resposta = generated.replaceAll(MARCA_CONTATO, '').trim()
-  const faltaInformacao = semInformacao(resposta)
-  const indicaContato = indicaContatoComEquipe(resposta)
+  const resposta = corrigirNomes(generated.replaceAll(MARCA_CONTATO, '')).trim()
+  const respostaFiltrada = removerConcorrentes(resposta)
+  const respostaRemovida = !respostaFiltrada
+  const respostaParaContato = respostaFiltrada || FALLBACK_SEM_CONCORRENTES
+  const faltaInformacao = semInformacao(respostaParaContato)
+  const indicaContato = indicaContatoComEquipe(respostaParaContato)
   const respostaFinal = faltaInformacao && !indicaContato
-    ? `${resposta} Fale com a equipe PoliVSR.`
-    : resposta
+    ? `${respostaParaContato} Fale com a equipe PoliVSR.`
+    : respostaParaContato
   return NextResponse.json({
     resposta: respostaFinal || FALLBACK_ANSWER,
-    contato: indicaContato || faltaInformacao || !resposta,
+    contato: respostaRemovida || indicaContato || faltaInformacao || !resposta,
   })
 }
