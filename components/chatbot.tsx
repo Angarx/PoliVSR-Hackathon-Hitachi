@@ -26,6 +26,7 @@ export default function Chatbot() {
   const [carregando, setCarregando] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fimRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!aberto) return
@@ -53,6 +54,49 @@ export default function Chatbot() {
     return () => {
       document.body.style.overflow = bodyOverflow
       window.removeEventListener('resize', atualizarBloqueio)
+    }
+  }, [aberto])
+
+  useEffect(() => {
+    if (!aberto) return
+
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    const mediaQuery = window.matchMedia('(max-width: 639px)')
+    let viewport: VisualViewport | null = null
+
+    const updateViewport = () => {
+      if (!viewport) return
+      const bottom = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+      dialog.style.bottom = `${bottom}px`
+      dialog.style.maxHeight = `${viewport.height}px`
+      fimRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' })
+    }
+    const removeViewportListeners = () => {
+      if (!viewport) return
+      viewport.removeEventListener('resize', updateViewport)
+      viewport.removeEventListener('scroll', updateViewport)
+      viewport = null
+    }
+    const syncViewport = () => {
+      removeViewportListeners()
+      dialog.style.removeProperty('bottom')
+      dialog.style.removeProperty('max-height')
+      if (!mediaQuery.matches || !window.visualViewport) return
+      viewport = window.visualViewport
+      viewport.addEventListener('resize', updateViewport)
+      viewport.addEventListener('scroll', updateViewport)
+      updateViewport()
+    }
+
+    syncViewport()
+    mediaQuery.addEventListener('change', syncViewport)
+    return () => {
+      mediaQuery.removeEventListener('change', syncViewport)
+      removeViewportListeners()
+      dialog.style.removeProperty('bottom')
+      dialog.style.removeProperty('max-height')
     }
   }, [aberto])
 
@@ -156,6 +200,7 @@ export default function Chatbot() {
 
       {aberto && (
         <section
+          ref={dialogRef}
           role="dialog"
           aria-label="Assistente PoliVSR"
           aria-modal="true"
